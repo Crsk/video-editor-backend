@@ -2,8 +2,7 @@ import 'dotenv/config'
 import { defineConfig } from 'drizzle-kit'
 import type { Config } from 'drizzle-kit'
 
-// Use D1 HTTP driver for Drizzle Studio
-const config = defineConfig({
+const config: Config = defineConfig({
   out: './drizzle/migrations',
   schema: './src/db/schema.ts',
   dialect: 'sqlite',
