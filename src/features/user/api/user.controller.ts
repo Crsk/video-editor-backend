@@ -1,10 +1,10 @@
 import { Context } from 'hono'
-import { IUserService } from './user-service'
-import { AppEnvironment } from '../types/environment'
-import { createUserSchema, UpdateUserInput } from './user-validation'
+import { UserService } from '../domain/user.service'
+import { createUserSchema, updateUserSchema } from './user.validation'
+import { AppEnvironment } from '../../../core/types/environment'
 
 export class UserController {
-  constructor(private userService: IUserService) {}
+  constructor(private userService: UserService) {}
 
   getUserById = async (c: Context<AppEnvironment>) => {
     try {
@@ -23,7 +23,6 @@ export class UserController {
   getAllUsers = async (c: Context<AppEnvironment>) => {
     try {
       const allUsers = await this.userService.getAllUsers()
-
       return c.json(allUsers)
     } catch (error) {
       console.error('Error fetching users:', error)
@@ -44,9 +43,13 @@ export class UserController {
     }
   }
 
-  updateUser = async (id: number, data: UpdateUserInput, c: Context<AppEnvironment>) => {
+  updateUser = async (c: Context<AppEnvironment>) => {
     try {
-      const updatedUser = await this.userService.updateUser(id, data)
+      const userId = c.req.param('id')
+      const userData = await c.req.json()
+      const validData = updateUserSchema.parse(userData)
+
+      const updatedUser = await this.userService.updateUser(Number(userId), validData)
       if (!updatedUser) return c.json({ error: 'User not found' }, 404)
 
       return c.json(updatedUser)
@@ -56,11 +59,12 @@ export class UserController {
     }
   }
 
-  deleteUser = async (id: number, c: Context<AppEnvironment>) => {
+  deleteUser = async (c: Context<AppEnvironment>) => {
     try {
-      const success = await this.userService.deleteUser(id)
-      if (!success) return c.json({ error: 'User not found' }, 404)
+      const userId = c.req.param('id')
+      const success = await this.userService.deleteUser(Number(userId))
 
+      if (!success) return c.json({ error: 'User not found' }, 404)
       return c.json({ success: true })
     } catch (error) {
       console.error('Error deleting user:', error)

@@ -1,4 +1,4 @@
-import { Container } from '../di/container'
+import { Container } from '../../di/container'
 
 declare global {
   interface D1Database {}

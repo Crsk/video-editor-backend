@@ -1,1 +1,1 @@
-export { users } from '../../users/user-schema'
+export { users } from '../../users-delete/user-schema'
