@@ -1,11 +1,13 @@
-import { User } from './user-model'
 import { IUserRepository } from './user-repository'
+import { CreateUserInput, UpdateUserInput } from './user-validation'
+import { User } from './user-models'
 
 export interface IUserService {
   getUserById(id: number): Promise<User | undefined>
   getAllUsers(): Promise<User[]>
-  createUser(userData: Omit<User, 'id'>): Promise<User>
-  seedDatabase(): Promise<void>
+  createUser(userData: CreateUserInput): Promise<User>
+  updateUser(id: number, data: UpdateUserInput): Promise<User | undefined>
+  deleteUser(id: number): Promise<boolean>
 }
 
 export class UserService implements IUserService {
@@ -19,19 +21,15 @@ export class UserService implements IUserService {
     return this.userRepository.findAll()
   }
 
-  async createUser(userData: Omit<User, 'id'>): Promise<User> {
+  async createUser(userData: CreateUserInput): Promise<User> {
     return this.userRepository.create(userData)
   }
 
-  async seedDatabase(): Promise<void> {
-    await this.userRepository.deleteAll()
+  async updateUser(id: number, data: UpdateUserInput): Promise<User | undefined> {
+    return this.userRepository.updateUser(id, data)
+  }
 
-    const users = [
-      { name: 'John Doe', email: 'john@example.com', test: 'test1' },
-      { name: 'Jane Smith', email: 'jane@example.com', test: 'test2' },
-      { name: 'Bob Johnson', email: 'bob@example.com', test: 'test3' }
-    ]
-
-    await this.userRepository.createMany(users)
+  async deleteUser(id: number): Promise<boolean> {
+    return this.userRepository.deleteUser(id)
   }
 }

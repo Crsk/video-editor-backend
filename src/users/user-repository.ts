@@ -1,14 +1,17 @@
 import { drizzle } from 'drizzle-orm/d1'
 import { eq } from 'drizzle-orm'
-import { usersTable } from './user-schema'
-import { User } from './user-model'
+import { users } from './user-schema'
+import { User, NewUser } from './user-models'
+import { UpdateUserInput } from './user-validation'
 
 export interface IUserRepository {
   findById(id: number): Promise<User | undefined>
   findAll(): Promise<User[]>
-  create(userData: Omit<User, 'id'>): Promise<User>
+  create(userData: NewUser): Promise<User>
   deleteAll(): Promise<void>
-  createMany(users: Omit<User, 'id'>[]): Promise<void>
+  createMany(usersData: NewUser[]): Promise<void>
+  updateUser(id: number, data: UpdateUserInput): Promise<User | undefined>
+  deleteUser(id: number): Promise<boolean>
 }
 
 export class UserRepository implements IUserRepository {
@@ -16,26 +19,38 @@ export class UserRepository implements IUserRepository {
 
   async findById(id: number): Promise<User | undefined> {
     const db = drizzle(this.db)
-    return db.select().from(usersTable).where(eq(usersTable.id, id)).get()
+
+    return db.select().from(users).where(eq(users.id, id)).get()
   }
 
   async findAll(): Promise<User[]> {
     const db = drizzle(this.db)
-    return db.select().from(usersTable).all()
+    return db.select().from(users).all()
   }
 
-  async create(userData: Omit<User, 'id'>): Promise<User> {
+  async create(userData: NewUser): Promise<User> {
     const db = drizzle(this.db)
-    return db.insert(usersTable).values(userData).returning().get()
+    return db.insert(users).values(userData).returning().get()
   }
 
   async deleteAll(): Promise<void> {
     const db = drizzle(this.db)
-    await db.delete(usersTable)
+    await db.delete(users)
   }
 
-  async createMany(users: Omit<User, 'id'>[]): Promise<void> {
+  async createMany(usersData: NewUser[]): Promise<void> {
     const db = drizzle(this.db)
-    await db.insert(usersTable).values(users)
+    await db.insert(users).values(usersData)
+  }
+
+  async updateUser(id: number, data: UpdateUserInput): Promise<User | undefined> {
+    const db = drizzle(this.db)
+    return db.update(users).set(data).where(eq(users.id, id)).returning().get()
+  }
+
+  async deleteUser(id: number): Promise<boolean> {
+    const db = drizzle(this.db)
+    const result = await db.delete(users).where(eq(users.id, id))
+    return result.rowsAffected > 0
   }
 }

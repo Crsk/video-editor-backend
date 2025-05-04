@@ -1,6 +1,7 @@
 import { Context } from 'hono'
 import { IUserService } from './user-service'
 import { AppEnvironment } from '../types/environment'
+import { createUserSchema, UpdateUserInput } from './user-validation'
 
 export class UserController {
   constructor(private userService: IUserService) {}
@@ -22,6 +23,7 @@ export class UserController {
   getAllUsers = async (c: Context<AppEnvironment>) => {
     try {
       const allUsers = await this.userService.getAllUsers()
+
       return c.json(allUsers)
     } catch (error) {
       console.error('Error fetching users:', error)
@@ -32,7 +34,9 @@ export class UserController {
   createUser = async (c: Context<AppEnvironment>) => {
     try {
       const userData = await c.req.json()
-      const newUser = await this.userService.createUser(userData)
+      const validUser = createUserSchema.parse(userData)
+      const newUser = await this.userService.createUser(validUser)
+
       return c.json(newUser, 201)
     } catch (error) {
       console.error('Error creating user:', error)
@@ -40,12 +44,26 @@ export class UserController {
     }
   }
 
-  seedDatabase = async (c: Context<AppEnvironment>) => {
+  updateUser = async (id: number, data: UpdateUserInput, c: Context<AppEnvironment>) => {
     try {
-      await this.userService.seedDatabase()
-      return c.json({ message: 'Database seeded successfully' })
+      const updatedUser = await this.userService.updateUser(id, data)
+      if (!updatedUser) return c.json({ error: 'User not found' }, 404)
+
+      return c.json(updatedUser)
     } catch (error) {
-      console.error('Error seeding database:', error)
+      console.error('Error updating user:', error)
+      return c.json({ error: 'Internal Server Error' }, 500)
+    }
+  }
+
+  deleteUser = async (id: number, c: Context<AppEnvironment>) => {
+    try {
+      const success = await this.userService.deleteUser(id)
+      if (!success) return c.json({ error: 'User not found' }, 404)
+
+      return c.json({ success: true })
+    } catch (error) {
+      console.error('Error deleting user:', error)
       return c.json({ error: 'Internal Server Error' }, 500)
     }
   }

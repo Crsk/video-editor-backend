@@ -13,9 +13,4 @@ app.use('*', async (c, next) => {
 
 app.route('/api/users', usersRouter)
 
-app.get('/api/seed', async c => {
-  const { userController } = c.get('container')
-  return userController.seedDatabase(c)
-})
-
 export default app
