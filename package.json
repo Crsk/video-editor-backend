@@ -3,12 +3,22 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy --minify",
-    "cf-typegen": "wrangler types --env-interface CloudflareBindings"
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings",
+    "drizzle:studio": "drizzle-kit studio",
+    "seed:remote": "wrangler d1 execute retwik_db --remote --file=./scripts/seed-remote.sql",
+    "seed:local": "wrangler d1 execute retwik_db --local --file=./scripts/seed-remote.sql"
   },
   "dependencies": {
+    "dotenv": "^16.5.0",
     "hono": "^4.7.8"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.15.3",
+    "better-sqlite3": "^11.9.1",
+    "drizzle-kit": "^0.31.1",
+    "drizzle-orm": "^0.43.1",
+    "tsx": "^4.19.4",
     "wrangler": "^4.4.0"
   }
 }

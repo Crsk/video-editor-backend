@@ -1,0 +1,9 @@
+name = "retwik-api"
+main = "src/index.ts"
+compatibility_date = "2025-05-04"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "retwik_db"
+database_id = "75baefe1-bbab-44dd-b765-47f403de4660"
+migrations_dir = "drizzle/migrations"
