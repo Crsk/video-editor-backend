@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { AppEnvironment } from './types/environment'
 import { createContainer } from './di/container'
+import { usersRouter } from './users'
 
 const app = new Hono<AppEnvironment>()
 
@@ -10,20 +11,7 @@ app.use('*', async (c, next) => {
   await next()
 })
 
-app.get('/api/users/:id', async c => {
-  const { userController } = c.get('container')
-  return userController.getUserById(c)
-})
-
-app.get('/api/users', async c => {
-  const { userController } = c.get('container')
-  return userController.getAllUsers(c)
-})
-
-app.post('/api/users', async c => {
-  const { userController } = c.get('container')
-  return userController.createUser(c)
-})
+app.route('/api/users', usersRouter)
 
 app.get('/api/seed', async c => {
   const { userController } = c.get('container')
