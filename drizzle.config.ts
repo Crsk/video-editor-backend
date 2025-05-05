@@ -4,7 +4,7 @@ import type { Config } from 'drizzle-kit'
 
 const config: Config = defineConfig({
   out: './drizzle/migrations',
-  schema: './src/db/schema.ts',
+  schema: './src/db/schema/index.ts',
   dialect: 'sqlite',
   driver: 'd1-http',
   dbCredentials: {

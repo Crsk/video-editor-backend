@@ -1,9 +1,35 @@
+import 'dotenv/config'
 import { Hono } from 'hono'
 import { AppEnvironment } from './core/types/environment'
 import { createContainer } from './di/container'
-import { setupUserRoutes } from './features/user/api/user.routes'
+import { cors } from 'hono/cors'
+import { getAuth, authMiddleware } from './features/auth/auth'
 
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',')
 const app = new Hono<AppEnvironment>()
+
+app.use(
+  '/api/auth/**',
+  cors({
+    origin: (origin, _) => {
+      if (allowedOrigins?.includes(origin)) return origin
+      return undefined
+    },
+    allowHeaders: ['Content-Type', 'Authorization'],
+    allowMethods: ['POST', 'GET', 'OPTIONS'],
+    exposeHeaders: ['Content-Length'],
+    maxAge: 600,
+    credentials: true
+  })
+)
+
+app.on(['POST', 'GET'], '/api/auth/**', c => {
+  const auth = getAuth(c)
+
+  return auth.handler(c.req.raw)
+})
+
+app.use('*', authMiddleware())
 
 app.use('*', async (c, next) => {
   const container = createContainer(c.env.DB)
@@ -11,21 +37,16 @@ app.use('*', async (c, next) => {
   await next()
 })
 
-// Create API router
 const apiRouter = new Hono<AppEnvironment>()
-
-// Set up user routes
 const userRouter = new Hono<AppEnvironment>()
+
 userRouter.get('/', c => c.get('container').userController.getAllUsers(c))
 userRouter.post('/', c => c.get('container').userController.createUser(c))
 userRouter.get('/:id', c => c.get('container').userController.getUserById(c))
 userRouter.put('/:id', c => c.get('container').userController.updateUser(c))
 userRouter.delete('/:id', c => c.get('container').userController.deleteUser(c))
 
-// Mount user routes to API
 apiRouter.route('/users', userRouter)
-
-// Mount API router to app
 app.route('/api', apiRouter)
 
 export default app
