@@ -8,3 +8,10 @@ binding = "DB"
 database_name = "retwik_db"
 database_id = "75baefe1-bbab-44dd-b765-47f403de4660"
 migrations_dir = "drizzle/migrations"
+
+[observability.logs]
+enabled = true
+
+[vars]
+ALLOWED_ORIGINS = "http://localhost:3000,https://retwik-api.crsssssk.workers.dev"
+BETTER_AUTH_URL = "https://retwik-api.crsssssk.workers.dev"
