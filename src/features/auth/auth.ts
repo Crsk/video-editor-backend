@@ -34,9 +34,18 @@ export const getAuth = (c: Context<AppEnvironment>) => {
         clientSecret: GOOGLE_CLIENT_SECRET
       }
     },
+    advanced: {
+      crossSubDomainCookies: {
+        enabled: true
+      },
+      defaultCookieAttributes: {
+        sameSite: 'none',
+        secure: true
+      }
+    },
     secret: BETTER_AUTH_SECRET,
     baseURL: BETTER_AUTH_URL,
-    trustedOrigins: ALLOWED_ORIGINS?.split(',')
+    trustedOrigins: ALLOWED_ORIGINS?.split(',') || []
   })
 
   authInstanceCache.set(d1db, authInstance)
