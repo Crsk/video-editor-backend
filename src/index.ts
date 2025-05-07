@@ -23,22 +23,40 @@ app.use(
   })
 )
 
-app.on(['POST', 'GET'], '/api/auth/**', c => {
+app.use(
+  '/api/*',
+  cors({
+    origin: (origin, _) => {
+      if (allowedOrigins?.includes(origin)) return origin
+      return undefined
+    },
+    allowHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    allowMethods: ['POST', 'GET', 'PUT', 'DELETE', 'OPTIONS'],
+    exposeHeaders: ['Content-Length', 'Access-Control-Allow-Origin'],
+    maxAge: 86400,
+    credentials: true
+  })
+)
+
+app.on(['POST', 'GET', 'PUT', 'DELETE', 'OPTIONS'], '/api/auth/**', c => {
   const auth = getAuth(c)
 
   return auth.handler(c.req.raw)
 })
 
-app.use('*', authMiddleware())
+// app.use('*', authMiddleware())
 
 app.use('*', async (c, next) => {
-  const container = createContainer(c.env.DB)
+  const container = createContainer(c.env)
   c.set('container', container)
   await next()
 })
 
 const apiRouter = new Hono<AppEnvironment>()
 const userRouter = new Hono<AppEnvironment>()
+const noteRouter = new Hono<AppEnvironment>()
+const transcribeRouter = new Hono<AppEnvironment>()
+const storageRouter = new Hono<AppEnvironment>()
 
 userRouter.get('/', c => c.get('container').userController.getAllUsers(c))
 userRouter.post('/', c => c.get('container').userController.createUser(c))
@@ -46,7 +64,21 @@ userRouter.get('/:id', c => c.get('container').userController.getUserById(c))
 userRouter.put('/:id', c => c.get('container').userController.updateUser(c))
 userRouter.delete('/:id', c => c.get('container').userController.deleteUser(c))
 
+noteRouter.get('/', c => c.get('container').noteController.getAllNotes(c))
+noteRouter.post('/', c => c.get('container').noteController.createNote(c))
+noteRouter.get('/:id', c => c.get('container').noteController.getNoteById(c))
+noteRouter.put('/:id', c => c.get('container').noteController.updateNote(c))
+noteRouter.delete('/:id', c => c.get('container').noteController.deleteNote(c))
+
+transcribeRouter.post('/', c => c.get('container').transcribeController.transcribeMedia(c))
+
+storageRouter.post('/', async c => await c.get('container').storageController.upload(c))
+
 apiRouter.route('/users', userRouter)
+apiRouter.route('/notes', noteRouter)
+apiRouter.route('/transcribe', transcribeRouter)
+apiRouter.route('/storage', storageRouter)
+
 app.route('/api', apiRouter)
 
 export default app
