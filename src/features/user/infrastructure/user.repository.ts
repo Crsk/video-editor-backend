@@ -29,6 +29,6 @@ export class UserRepository {
   async deleteUser(id: number): Promise<boolean> {
     const db = drizzle(this.db)
     const result = await db.delete(users).where(eq(users.id, id))
-    return result.rowsAffected > 0
+    return result.success
   }
 }
