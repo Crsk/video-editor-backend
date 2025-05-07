@@ -5,6 +5,8 @@ export class StorageService {
 
   async upload(files: File[]) {
     const uploadKeys: string[] = []
+    const urls: string[] = []
+
     for (const file of files) {
       let fileName = file.name
       if (fileName === 'blob' || !fileName.includes('.')) {
@@ -15,10 +17,14 @@ export class StorageService {
 
       const obj = await this.env.R2.put(`recordings/${fileName}`, file)
 
-      if (obj) uploadKeys.push(obj.key)
+      if (obj) {
+        uploadKeys.push(obj.key)
+        const bucketUrl = this.env.R2_PUBLIC_URL || 'no-public-url'
+        const url = `${bucketUrl}/${obj.key}`
+        urls.push(url)
+      }
     }
 
-    console.info('uploaded media', uploadKeys)
-    return uploadKeys
+    return { keys: uploadKeys, urls }
   }
 }

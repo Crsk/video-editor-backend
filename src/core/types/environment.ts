@@ -15,6 +15,7 @@ export type AppEnvironment = {
     DB: D1Database
     AI: AI
     R2: R2Bucket
+    R2_PUBLIC_URL: string
   }
   Variables: {
     container: Container

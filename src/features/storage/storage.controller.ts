@@ -12,12 +12,11 @@ export class StorageController {
 
       if (!files || files.length === 0) return c.json({ error: 'Missing media files to upload' }, 400)
 
-      const uploadKeys = await this.storageService.upload(files)
-      const uploaded = uploadKeys && uploadKeys.length > 0
+      const result = await this.storageService.upload(files)
+      const uploaded = result && result.urls && result.urls.length > 0
 
-      uploaded
-        ? c.json({ keys: uploadKeys })
-        : c.json({ error: 'Failed to upload media. No files were uploaded.' }, 400)
+      if (uploaded) return c.json({ urls: result.urls })
+      else return c.json({ error: 'Failed to upload media. No files were uploaded.' }, 400)
     } catch (error) {
       console.error('Error uploading media:', error)
       return c.json({ error: 'Failed to upload media. Please try again.' }, 500)
