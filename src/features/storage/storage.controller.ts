@@ -1,12 +1,12 @@
 import { AppEnvironment } from '../../core/types/environment'
 import { Context } from 'hono'
 import { StorageService } from './storage.service'
-import { NoteService } from '../note/domain/note.service'
+import { VideoService } from '../video/domain/video.service'
 import { env } from 'hono/adapter'
-import { newNote } from '../note/domain/new-note'
+import { newVideo } from '../video/domain/new-video'
 
 export class StorageController {
-  constructor(private storageService: StorageService, private noteService: NoteService) {}
+  constructor(private storageService: StorageService, private videoService: VideoService) {}
 
   upload = async (c: Context<AppEnvironment>) => {
     try {
@@ -22,9 +22,9 @@ export class StorageController {
         const { BUCKET_PUBLIC_URL } = env<{ BUCKET_PUBLIC_URL: string }>(c)
         const videoUrl = `${BUCKET_PUBLIC_URL}/${result.keys[0]}`
         const userId = formData.get('userId') as string
-        const note = newNote({ userId: userId, props: { videoUrl } })
+        const video = newVideo({ userId: userId, props: { videoUrl } })
 
-        await this.noteService.createNote(note)
+        await this.videoService.createVideo(video)
 
         return c.json({ urls: result.urls })
       } else return c.json({ error: 'Failed to upload media. No files were uploaded.' }, 400)

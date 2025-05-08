@@ -3,9 +3,9 @@ import { sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { user } from '../../user/infrastructure/user.schema'
 import { z } from 'zod'
 
-export const note = sqliteTable('note', {
+export const video = sqliteTable('video', {
   id: text('id').primaryKey(),
-  text: text('text').notNull(),
+  transcript: text('text').notNull(),
   audioUrls: text('audio_urls').notNull(),
   videoUrl: text('video_url').notNull(),
   userId: text('user_id')
@@ -13,10 +13,10 @@ export const note = sqliteTable('note', {
     .references(() => user.id)
 })
 
-export const insertNoteSchema = createInsertSchema(note).extend({
+export const insertVideoSchema = createInsertSchema(video).extend({
   videoUrl: z.string().url()
 })
-export const selectNoteSchema = createSelectSchema(note)
-export const updateNoteSchema = createUpdateSchema(note).extend({
+export const selectVideoSchema = createSelectSchema(video)
+export const updateVideoSchema = createUpdateSchema(video).extend({
   videoUrl: z.string().url().optional()
 })

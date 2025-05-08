@@ -54,7 +54,7 @@ app.use('*', async (c, next) => {
 
 const apiRouter = new Hono<AppEnvironment>()
 const userRouter = new Hono<AppEnvironment>()
-const noteRouter = new Hono<AppEnvironment>()
+const videoRouter = new Hono<AppEnvironment>()
 const transcribeRouter = new Hono<AppEnvironment>()
 const storageRouter = new Hono<AppEnvironment>()
 
@@ -62,18 +62,18 @@ userRouter.get('/', c => c.get('container').userController.getAllUsers(c))
 userRouter.get('/:id', c => c.get('container').userController.getUserById(c))
 userRouter.put('/:id', c => c.get('container').userController.updateUser(c))
 
-noteRouter.get('/', c => c.get('container').noteController.getAllNotes(c))
-noteRouter.post('/', c => c.get('container').noteController.createNote(c))
-noteRouter.get('/:id', c => c.get('container').noteController.getNoteById(c))
-noteRouter.put('/:id', c => c.get('container').noteController.updateNote(c))
-noteRouter.delete('/:id', c => c.get('container').noteController.deleteNote(c))
+videoRouter.get('/', c => c.get('container').videoController.getAllVideos(c))
+videoRouter.post('/', c => c.get('container').videoController.createVideo(c))
+videoRouter.get('/:id', c => c.get('container').videoController.getVideoById(c))
+videoRouter.put('/:id', c => c.get('container').videoController.updateVideo(c))
+videoRouter.delete('/:id', c => c.get('container').videoController.deleteVideo(c))
 
 transcribeRouter.post('/', c => c.get('container').transcribeController.transcribeMedia(c))
 
 storageRouter.post('/', async c => await c.get('container').storageController.upload(c))
 
 apiRouter.route('/users', userRouter)
-apiRouter.route('/notes', noteRouter)
+apiRouter.route('/videos', videoRouter)
 apiRouter.route('/transcribe', transcribeRouter)
 apiRouter.route('/storage', storageRouter)
 

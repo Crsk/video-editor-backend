@@ -1,9 +1,9 @@
 import { UserRepository } from '../features/user/infrastructure/user.repository'
 import { UserService } from '../features/user/domain/user.service'
 import { UserController } from '../features/user/api/user.controller'
-import { NoteService } from '../features/note/domain/note.service'
-import { NoteController } from '../features/note/api/note.controller'
-import { NoteRepository } from '../features/note/infrastructure/note.repository'
+import { VideoService } from '../features/video/domain/video.service'
+import { VideoController } from '../features/video/api/video.controller'
+import { VideoRepository } from '../features/video/infrastructure/video.repository'
 import { AIService } from '../features/ai/ai.service'
 import { TranscribeService } from '../features/transcribe/domain/transcribe.service'
 import { TranscribeController } from '../features/transcribe/api/transcribe.controller'
@@ -13,7 +13,7 @@ import { StorageController } from '../features/storage/storage.controller'
 
 export type Container = {
   userController: UserController
-  noteController: NoteController
+  videoController: VideoController
   transcribeController: TranscribeController
   storageController: StorageController
 }
@@ -28,19 +28,19 @@ export const createContainer = (env: AppEnvironment['Bindings']): Container => {
 
   const aiService = new AIService(ai)
 
-  const noteRepository = new NoteRepository(db)
-  const noteService = new NoteService(noteRepository)
-  const noteController = new NoteController(noteService)
+  const videoRepository = new VideoRepository(db)
+  const videoService = new VideoService(videoRepository)
+  const videoController = new VideoController(videoService)
 
   const transcribeService = new TranscribeService(aiService)
   const transcribeController = new TranscribeController(transcribeService)
 
   const storageService = new StorageService(env)
-  const storageController = new StorageController(storageService, noteService)
+  const storageController = new StorageController(storageService, videoService)
 
   return {
     userController,
-    noteController,
+    videoController,
     transcribeController,
     storageController
   }
