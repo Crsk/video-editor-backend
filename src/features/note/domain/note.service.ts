@@ -1,10 +1,10 @@
-import { Note, NewNote, UpdateNote } from './note.entity'
+import { Note, CreateNote, UpdateNote } from './note.entity'
 import { NoteRepository } from '../infrastructure/note.repository'
 
 export class NoteService {
   constructor(private noteRepository: NoteRepository) {}
 
-  async getNoteById(id: number): Promise<Note | undefined> {
+  async getNoteById(id: string): Promise<Note | undefined> {
     return this.noteRepository.findById(id)
   }
 
@@ -12,15 +12,15 @@ export class NoteService {
     return this.noteRepository.findAll()
   }
 
-  async createNote(userData: NewNote): Promise<Note> {
+  async createNote(userData: CreateNote): Promise<Note> {
     return this.noteRepository.create(userData)
   }
 
-  async updateNote(id: number, data: UpdateNote): Promise<Note | undefined> {
+  async updateNote(id: string, data: UpdateNote): Promise<Note | undefined> {
     return this.noteRepository.update(id, data)
   }
 
-  async deleteNote(id: number): Promise<boolean> {
+  async deleteNote(id: string): Promise<boolean> {
     return this.noteRepository.delete(id)
   }
 }

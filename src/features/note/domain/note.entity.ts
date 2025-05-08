@@ -1,11 +1,6 @@
 import { z } from 'zod'
-import { createNoteSchema, updateNoteSchema } from '../api/note.validation'
+import { insertNoteSchema, selectNoteSchema, updateNoteSchema } from '../infrastructure/note.schema'
 
-export interface Note {
-  id: number
-  audioUrls: string
-  text: string
-}
-
-export type NewNote = z.infer<typeof createNoteSchema>
+export type Note = z.infer<typeof selectNoteSchema>
+export type CreateNote = z.infer<typeof insertNoteSchema>
 export type UpdateNote = z.infer<typeof updateNoteSchema>

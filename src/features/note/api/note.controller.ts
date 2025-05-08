@@ -1,6 +1,6 @@
 import { Context } from 'hono'
 import { NoteService } from '../domain/note.service'
-import { createNoteSchema, updateNoteSchema } from './note.validation'
+import { insertNoteSchema, updateNoteSchema } from '../infrastructure/note.schema'
 import { AppEnvironment } from '../../../core/types/environment'
 
 export class NoteController {
@@ -9,7 +9,7 @@ export class NoteController {
   getNoteById = async (c: Context<AppEnvironment>) => {
     try {
       const noteId = c.req.param('id')
-      const note = await this.noteService.getNoteById(Number(noteId))
+      const note = await this.noteService.getNoteById(noteId)
 
       if (!note) return c.json({ error: 'Note not found' }, 404)
 
@@ -23,6 +23,7 @@ export class NoteController {
   getAllNotes = async (c: Context<AppEnvironment>) => {
     try {
       const allNotes = await this.noteService.getAllNotes()
+
       return c.json(allNotes)
     } catch (error) {
       console.error('Error fetching notes:', error)
@@ -33,7 +34,7 @@ export class NoteController {
   createNote = async (c: Context<AppEnvironment>) => {
     try {
       const noteData = await c.req.json()
-      const validNote = createNoteSchema.parse(noteData)
+      const validNote = insertNoteSchema.parse(noteData)
       const newNote = await this.noteService.createNote(validNote)
 
       return c.json(newNote, 201)
@@ -48,8 +49,7 @@ export class NoteController {
       const noteId = c.req.param('id')
       const noteData = await c.req.json()
       const validData = updateNoteSchema.parse(noteData)
-
-      const updatedNote = await this.noteService.updateNote(Number(noteId), validData)
+      const updatedNote = await this.noteService.updateNote(noteId, validData)
       if (!updatedNote) return c.json({ error: 'Note not found' }, 404)
 
       return c.json(updatedNote)
@@ -62,9 +62,10 @@ export class NoteController {
   deleteNote = async (c: Context<AppEnvironment>) => {
     try {
       const noteId = c.req.param('id')
-      const success = await this.noteService.deleteNote(Number(noteId))
+      const success = await this.noteService.deleteNote(noteId)
 
       if (!success) return c.json({ error: 'Note not found' }, 404)
+
       return c.json({ success: true })
     } catch (error) {
       console.error('Error deleting note:', error)

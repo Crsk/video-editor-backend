@@ -59,10 +59,8 @@ const transcribeRouter = new Hono<AppEnvironment>()
 const storageRouter = new Hono<AppEnvironment>()
 
 userRouter.get('/', c => c.get('container').userController.getAllUsers(c))
-userRouter.post('/', c => c.get('container').userController.createUser(c))
 userRouter.get('/:id', c => c.get('container').userController.getUserById(c))
 userRouter.put('/:id', c => c.get('container').userController.updateUser(c))
-userRouter.delete('/:id', c => c.get('container').userController.deleteUser(c))
 
 noteRouter.get('/', c => c.get('container').noteController.getAllNotes(c))
 noteRouter.post('/', c => c.get('container').noteController.createNote(c))

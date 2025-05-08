@@ -36,7 +36,7 @@ export const createContainer = (env: AppEnvironment['Bindings']): Container => {
   const transcribeController = new TranscribeController(transcribeService)
 
   const storageService = new StorageService(env)
-  const storageController = new StorageController(storageService)
+  const storageController = new StorageController(storageService, noteService)
 
   return {
     userController,

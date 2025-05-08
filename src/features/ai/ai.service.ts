@@ -3,7 +3,7 @@ export class AIService {
 
   async transcribeMedia(mediaData: number[]): Promise<string> {
     try {
-      const response = await this.ai.run('@cf/openai/whisper', { media: mediaData })
+      const response = await this.ai.run('@cf/openai/whisper', { audio: mediaData })
 
       return response.text
     } catch (error) {
