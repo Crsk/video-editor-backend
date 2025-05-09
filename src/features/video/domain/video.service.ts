@@ -5,11 +5,11 @@ import { HttpError, Response } from '../../../utils/attempt/http'
 export class VideoService {
   constructor(private videoRepository: VideoRepository) {}
 
-  async getVideoById(id: string): Promise<Video | undefined> {
+  async getVideoById(id: string): Promise<Response<Video | undefined>> {
     return this.videoRepository.findById(id)
   }
 
-  async getAllVideos(): Promise<Video[]> {
+  async getAllVideos(): Promise<Response<Video[]>> {
     return this.videoRepository.findAll()
   }
 
@@ -19,11 +19,11 @@ export class VideoService {
     return this.videoRepository.create(data)
   }
 
-  async updateVideo(id: string, data: UpdateVideo): Promise<Video | undefined> {
+  async updateVideo(id: string, data: UpdateVideo): Promise<Response<Video | undefined>> {
     return this.videoRepository.update(id, data)
   }
 
-  async deleteVideo(id: string): Promise<boolean> {
+  async deleteVideo(id: string): Promise<Response<boolean>> {
     return this.videoRepository.delete(id)
   }
 }

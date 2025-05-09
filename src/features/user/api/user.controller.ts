@@ -2,47 +2,40 @@ import { Context } from 'hono'
 import { UserService } from '../domain/user.service'
 import { updateUserSchema } from '../infrastructure/user.schema'
 import { AppEnvironment } from '../../../core/types/environment'
+import { withLogging } from '../../../utils/with-logging'
 
 export class UserController {
   constructor(private userService: UserService) {}
 
   getUserById = async (c: Context<AppEnvironment>) => {
-    try {
-      const userId = c.req.param('id')
-      const user = await this.userService.getUserById(userId)
+    const userId = c.req.param('id')
+    const [error, user] = await withLogging('Get user by id', { userId }, () => this.userService.getUserById(userId))
 
-      if (!user) return c.json({ error: 'User not found' }, 404)
+    if (error) return c.json({ success: false }, error.code)
 
-      return c.json(user)
-    } catch (error) {
-      console.error('Error fetching user:', error)
-      return c.json({ error: 'Internal Server Error' }, 500)
-    }
+    return c.json({ success: true, data: user }, 200)
   }
 
   getAllUsers = async (c: Context<AppEnvironment>) => {
-    try {
-      const allUsers = await this.userService.getAllUsers()
-      return c.json(allUsers)
-    } catch (error) {
-      console.error('Error fetching users:', error)
-      return c.json({ error: 'Internal Server Error' }, 500)
-    }
+    const [error, allUsers] = await withLogging('Get all users', {}, () => this.userService.getAllUsers())
+    if (error) return c.json({ success: false }, error.code)
+
+    return c.json({ success: true, data: allUsers }, 200)
   }
 
   updateUser = async (c: Context<AppEnvironment>) => {
-    try {
-      const userId = c.req.param('id')
-      const userData = await c.req.json()
-      const validData = updateUserSchema.parse(userData)
+    const userId = c.req.param('id')
+    const userData = await c.req.json()
+    if (!userId) return c.json({ success: false }, 400)
 
-      const updatedUser = await this.userService.updateUser(userId, validData)
-      if (!updatedUser) return c.json({ error: 'User not found' }, 404)
+    const validData = updateUserSchema.parse(userData)
 
-      return c.json(updatedUser)
-    } catch (error) {
-      console.error('Error updating user:', error)
-      return c.json({ error: 'Internal Server Error' }, 500)
-    }
+    const [error, updatedUser] = await withLogging('Update user', { userId }, () =>
+      this.userService.updateUser(userId, validData)
+    )
+
+    if (error) return c.json({ success: false }, error.code)
+
+    return c.json({ success: true, data: updatedUser }, 200)
   }
 }

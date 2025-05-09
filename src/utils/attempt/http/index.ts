@@ -2,7 +2,7 @@ import { HttpError, ErrorType } from './error'
 
 export type Response<T> = [HttpError | null, T | null]
 
-export const httpTry = async <T>(promise: Promise<T>): Promise<Response<T>> => {
+export const attempt = async <T>(promise: Promise<T>): Promise<Response<T>> => {
   try {
     return [null, await promise]
   } catch (err) {

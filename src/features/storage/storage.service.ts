@@ -1,6 +1,6 @@
 import { AppEnvironment } from '../../core/types/environment'
 import { dateId } from '../../utils/date-id'
-import { httpTry, HttpError, Response } from '../../utils/attempt/http'
+import { attempt, HttpError, Response } from '../../utils/attempt/http'
 
 export class StorageService {
   constructor(private env: AppEnvironment['Bindings']) {}
@@ -13,7 +13,7 @@ export class StorageService {
       const id = dateId()
       const fileName = `${id}_${file.name}`
       const filePath = `${path}/${fileName}`
-      const [error, data] = await httpTry(this.env.R2.put(filePath, file))
+      const [error, data] = await attempt(this.env.R2.put(filePath, file))
 
       if (error || !data) return [error, null]
 
