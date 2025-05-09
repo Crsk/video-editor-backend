@@ -59,3 +59,9 @@ export const authMiddleware = () => {
     await next()
   }
 }
+
+export const authHandler = (c: Context<AppEnvironment>) => {
+  const auth = getAuth(c)
+
+  return auth.handler(c.req.raw)
+}

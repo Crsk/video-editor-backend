@@ -1,64 +1,19 @@
 import 'dotenv/config'
 import { Hono } from 'hono'
 import { AppEnvironment } from './core/types/environment'
-import { createContainer } from './di/container'
-import { cors } from 'hono/cors'
-import { getAuth, authMiddleware } from './features/auth/auth'
+import { authHandler } from './features/auth/auth'
+import { tryCatchMiddleware } from './core/middlewares/try-catch'
+import { corsMiddleware } from './core/middlewares/cors'
+import { authCorsMiddleware } from './core/middlewares/cors'
+import { diContainerMiddleware } from './core/middlewares/di-container'
 
-const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',')
 const app = new Hono<AppEnvironment>()
 
-app.use(
-  '/api/auth/**',
-  cors({
-    origin: (origin, _) => {
-      if (allowedOrigins?.includes(origin)) return origin
-      return undefined
-    },
-    allowHeaders: ['Content-Type', 'Authorization'],
-    allowMethods: ['POST', 'GET', 'OPTIONS'],
-    exposeHeaders: ['Content-Length'],
-    maxAge: 600,
-    credentials: true
-  })
-)
-
-app.use(
-  '/api/*',
-  cors({
-    origin: (origin, _) => {
-      if (allowedOrigins?.includes(origin)) return origin
-      return undefined
-    },
-    allowHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-    allowMethods: ['POST', 'GET', 'PUT', 'DELETE', 'OPTIONS'],
-    exposeHeaders: ['Content-Length', 'Access-Control-Allow-Origin'],
-    maxAge: 86400,
-    credentials: true
-  })
-)
-
-app.on(['POST', 'GET', 'PUT', 'DELETE', 'OPTIONS'], '/api/auth/**', c => {
-  const auth = getAuth(c)
-
-  return auth.handler(c.req.raw)
-})
-
-app.use('*', async (c, next) => {
-  try {
-    await next()
-  } catch (error) {
-    return c.json({ error: 'Internal Server Error' }, 500)
-  }
-})
-
-// app.use('*', authMiddleware())
-
-app.use('*', async (c, next) => {
-  const container = createContainer(c.env)
-  c.set('container', container)
-  await next()
-})
+app.use('*', tryCatchMiddleware())
+app.use('/api/*', corsMiddleware())
+app.use('/api/auth/**', authCorsMiddleware())
+app.use('/api/auth/**', authHandler)
+app.use('*', diContainerMiddleware())
 
 const apiRouter = new Hono<AppEnvironment>()
 const userRouter = new Hono<AppEnvironment>()
