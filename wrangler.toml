@@ -1,6 +1,6 @@
 name = "retwik-api"
 main = "src/index.ts"
-compatibility_date = "2025-05-04"
+compatibility_date = "2025-04-28"
 compatibility_flags = ["nodejs_compat"]
 
 [[d1_databases]]
@@ -15,6 +15,7 @@ enabled = true
 [vars]
 ALLOWED_ORIGINS = "http://localhost:3000,https://retwik-api.crsssssk.workers.dev"
 BETTER_AUTH_URL = "https://retwik-api.crsssssk.workers.dev"
+BUCKET_PUBLIC_URL = "https://pub-8885b6d8afb6420387a1bd5f3e53e364.r2.dev"
 
 [ai]
 binding = "AI"

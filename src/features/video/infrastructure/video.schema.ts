@@ -5,8 +5,8 @@ import { z } from 'zod'
 
 export const video = sqliteTable('video', {
   id: text('id').primaryKey(),
-  transcript: text('text').notNull(),
-  audioUrls: text('audio_urls').notNull(),
+  transcript: text('transcript'),
+  audioUrls: text('audio_urls'),
   videoUrl: text('video_url').notNull(),
   userId: text('user_id')
     .notNull()
