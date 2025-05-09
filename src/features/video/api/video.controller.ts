@@ -32,16 +32,18 @@ export class VideoController {
   }
 
   createVideo = async (c: Context<AppEnvironment>) => {
-    try {
-      const videoData = await c.req.json()
-      const validVideo = insertVideoSchema.parse(videoData)
-      const newVideo = await this.videoService.createVideo(validVideo)
+    const videoData = await c.req.json()
+    const validVideo = insertVideoSchema.parse(videoData)
+    const [error, data] = await this.videoService.createVideo(validVideo)
 
-      return c.json(newVideo, 201)
-    } catch (error) {
+    if (error) {
       console.error('Error creating video:', error)
-      return c.json({ error: 'Internal Server Error' }, 500)
+      return c.json({ success: false, message: error.message }, error.code)
     }
+
+    if (data) return c.json({ success: true, data: { url: data.videoUrl } }, 201)
+
+    return c.json({ message: 'Internal Server Error' }, 500)
   }
 
   updateVideo = async (c: Context<AppEnvironment>) => {

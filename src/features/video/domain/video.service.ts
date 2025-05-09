@@ -1,5 +1,6 @@
 import { Video, CreateVideo, UpdateVideo } from './video.entity'
 import { VideoRepository } from '../infrastructure/video.repository'
+import { HttpError, Response } from '../../../utils/attempt/http'
 
 export class VideoService {
   constructor(private videoRepository: VideoRepository) {}
@@ -12,8 +13,10 @@ export class VideoService {
     return this.videoRepository.findAll()
   }
 
-  async createVideo(userData: CreateVideo): Promise<Video> {
-    return this.videoRepository.create(userData)
+  async createVideo(data: CreateVideo): Promise<Response<Video>> {
+    if (!data.userId) return [new HttpError('BAD_REQUEST', 'User ID is required'), null]
+
+    return this.videoRepository.create(data)
   }
 
   async updateVideo(id: string, data: UpdateVideo): Promise<Video | undefined> {

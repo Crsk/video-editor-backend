@@ -1,30 +1,29 @@
 import { AppEnvironment } from '../../core/types/environment'
+import { dateId } from '../../utils/date-id'
+import { httpTry, HttpError, Response } from '../../utils/attempt/http'
 
 export class StorageService {
   constructor(private env: AppEnvironment['Bindings']) {}
 
-  async upload(files: File[]) {
+  async upload(files: File[], bucketUrl: string, path: string): Promise<Response<{ urls: string[] }>> {
     const uploadKeys: string[] = []
     const urls: string[] = []
 
     for (const file of files) {
-      let fileName = file.name
-      if (fileName === 'blob' || !fileName.includes('.')) {
-        const timestamp = Date.now()
-        const fileType = file.type.split('/')[1] || 'bin'
-        fileName = `file_${timestamp}.${fileType}`
-      }
+      const id = dateId()
+      const fileName = `${id}_${file.name}`
+      const filePath = `${path}/${fileName}`
+      const [error, data] = await httpTry(this.env.R2.put(filePath, file))
 
-      const obj = await this.env.R2.put(`recordings/${fileName}`, file)
+      if (error || !data) return [error, null]
 
-      if (obj) {
-        uploadKeys.push(obj.key)
-        const bucketUrl = this.env.R2_PUBLIC_URL || 'no-public-url'
-        const url = `${bucketUrl}/${obj.key}`
-        urls.push(url)
-      }
+      uploadKeys.push(data.key)
+      const url = `${bucketUrl}/${filePath}`
+      urls.push(url)
     }
 
-    return { keys: uploadKeys, urls }
+    if (urls.length > 0) return [null, { urls }]
+
+    return [new HttpError('BAD_REQUEST', 'No files uploaded'), null]
   }
 }

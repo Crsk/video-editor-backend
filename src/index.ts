@@ -44,6 +44,14 @@ app.on(['POST', 'GET', 'PUT', 'DELETE', 'OPTIONS'], '/api/auth/**', c => {
   return auth.handler(c.req.raw)
 })
 
+app.use('*', async (c, next) => {
+  try {
+    await next()
+  } catch (error) {
+    return c.json({ error: 'Internal Server Error' }, 500)
+  }
+})
+
 // app.use('*', authMiddleware())
 
 app.use('*', async (c, next) => {

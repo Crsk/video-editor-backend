@@ -2,6 +2,7 @@ import { drizzle } from 'drizzle-orm/d1'
 import { eq } from 'drizzle-orm'
 import { video } from './video.schema'
 import { Video, CreateVideo, UpdateVideo } from '../domain/video.entity'
+import { httpTry, type Response } from '../../../utils/attempt/http'
 
 export class VideoRepository {
   constructor(private db: D1Database) {}
@@ -18,10 +19,10 @@ export class VideoRepository {
     return db.select().from(video).all()
   }
 
-  async create(videoData: CreateVideo): Promise<Video> {
+  async create(videoData: CreateVideo): Promise<Response<Video>> {
     const db = drizzle(this.db)
 
-    return db.insert(video).values(videoData).returning().get()
+    return await httpTry(db.insert(video).values(videoData).returning().get())
   }
 
   async update(id: string, videoData: UpdateVideo): Promise<Video | undefined> {
