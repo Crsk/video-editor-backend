@@ -63,26 +63,21 @@ export class ProjectRepository {
     const db = drizzle(this.db)
 
     return attempt(
-      db.transaction(async tx => {
-        const [projectError] = await attempt(
-          tx
+      db
+        .batch([
+          db
             .insert(project)
             .values({ id: projectId, ...projectData })
             .onConflictDoUpdate({
               target: project.id,
               set: projectData
-            })
-        )
-        if (projectError) return false
-
-        const [userToProjectError] = await attempt(
-          tx.insert(userToProject).values({ userId, projectId }).onConflictDoNothing()
-        )
-
-        if (userToProjectError) return false
-
-        return true
-      })
+            }),
+          db.insert(userToProject).values({ userId, projectId }).onConflictDoNothing()
+        ])
+        .then(([result1, result2]) => {
+          if (result1.success && result2.success) return true
+          return false
+        })
     )
   }
 
@@ -103,13 +98,15 @@ export class ProjectRepository {
     const db = drizzle(this.db)
 
     return attempt(
-      db.transaction(async tx => {
-        const [err] = await attempt(tx.insert(video).values(videoData))
-        const [err2] = await attempt(tx.insert(videoToProject).values({ projectId, videoId: videoData.id }))
-
-        if (err || err2) return false
-        return true
-      })
+      db
+        .batch([
+          db.insert(video).values(videoData),
+          db.insert(videoToProject).values({ projectId, videoId: videoData.id })
+        ])
+        .then(([result1, result2]) => {
+          if (result1.success && result2.success) return true
+          return false
+        })
     )
   }
 }
