@@ -5,8 +5,8 @@ import { attempt, HttpError, Response } from '../../utils/attempt/http'
 export class StorageService {
   constructor(private env: AppEnvironment['Bindings']) {}
 
-  async upload(files: File[], bucketUrl: string, path: string): Promise<Response<Record<string, string>>> {
-    const keyUrlMap: Record<string, string> = {}
+  async upload(files: File[], bucketUrl: string, path: string): Promise<Response<{ urls: string[] }>> {
+    const urls: string[] = []
 
     for (const file of files) {
       const id = dateId()
@@ -17,11 +17,10 @@ export class StorageService {
       if (error || !data) return [error, null]
 
       const url = `${bucketUrl}/${filePath}`
-
-      keyUrlMap[data.key] = url
+      urls.push(url)
     }
 
-    if (Object.keys(keyUrlMap).length > 0) return [null, keyUrlMap]
+    if (urls.length > 0) return [null, { urls }]
 
     return [new HttpError('BAD_REQUEST', 'No files uploaded'), null]
   }
