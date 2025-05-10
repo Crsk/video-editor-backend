@@ -1,8 +1,8 @@
 import { CreateVideo } from './video.entity'
 
-export const newVideo = ({ props }: { props?: Partial<CreateVideo> }): CreateVideo => {
+export const newVideo = ({ id, ...props }: { id: string } & Partial<CreateVideo>): CreateVideo => {
   return {
-    id: props?.id || crypto.randomUUID(),
+    id,
     transcript: props?.transcript || '',
     audioUrls: props?.audioUrls || '',
     videoUrl: props?.videoUrl || '',

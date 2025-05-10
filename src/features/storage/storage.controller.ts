@@ -37,14 +37,14 @@ export class StorageController {
     if (uploadError) return c.json({ success: false, message: 'Failed to upload video' }, uploadError.code)
     if (!upload) return c.json({ success: false, message: 'Failed to upload video' }, 500)
 
-    for (const url of upload.urls) {
-      const validVideo = newVideo({ props: { videoUrl: url } })
+    for (const [key, url] of Object.entries(upload)) {
+      const validVideo = newVideo({ id: key, videoUrl: url })
       const [videoError] = await withLogging('Create video entry', { projectId, videoUrl: url }, () =>
         this.projectService.addVideoToProject({ projectId, videoData: validVideo })
       )
       if (videoError) return c.json({ success: false, message: 'Failed to create video' }, videoError.code)
     }
 
-    return c.json({ success: true, data: { urls: upload.urls } })
+    return c.json({ success: true, data: { urls: Object.values(upload) } })
   }
 }
