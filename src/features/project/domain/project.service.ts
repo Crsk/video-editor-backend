@@ -3,6 +3,7 @@ import { ProjectRepository } from '../infrastructure/project.repository'
 import { Response } from '../../../utils/attempt/http'
 import { CreateVideo, Video } from '../../video/domain/video.entity'
 import { UpdateProject } from '../domain/project.entity'
+import { newProject } from './new-project'
 
 export class ProjectService {
   constructor(private projectRepository: ProjectRepository) {}
@@ -38,7 +39,8 @@ export class ProjectService {
     userId: string
     projectData: UpdateProject
   }): Promise<Response<boolean>> {
-    return this.projectRepository.upsertProject({ projectId, userId, projectData })
+    const validProject = newProject({ id: projectId, ...projectData })
+    return this.projectRepository.upsertProject({ projectId, userId, projectData: validProject })
   }
 
   async deleteProject({ projectId }: { projectId: string }): Promise<Response<boolean>> {
