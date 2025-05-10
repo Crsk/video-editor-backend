@@ -26,4 +26,8 @@ export class VideoService {
   async deleteVideo(id: string): Promise<Response<boolean>> {
     return this.videoRepository.delete(id)
   }
+
+  async getVideosByUserId(userId: string): Promise<Response<Video[]>> {
+    return this.videoRepository.findByUserId(userId)
+  }
 }

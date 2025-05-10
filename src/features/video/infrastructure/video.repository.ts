@@ -39,4 +39,10 @@ export class VideoRepository {
 
     return [null, true]
   }
+
+  async findByUserId(userId: string): Promise<Response<Video[]>> {
+    const db = drizzle(this.db)
+
+    return attempt(db.select().from(video).where(eq(video.userId, userId)).all())
+  }
 }

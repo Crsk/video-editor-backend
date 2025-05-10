@@ -3,9 +3,10 @@ import { UserService } from '../domain/user.service'
 import { updateUserSchema } from '../infrastructure/user.schema'
 import { AppEnvironment } from '../../../core/types/environment'
 import { withLogging } from '../../../utils/with-logging'
+import { VideoService } from '../../video/domain/video.service'
 
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(private userService: UserService, private videoService: VideoService) {}
 
   getUserById = async (c: Context<AppEnvironment>) => {
     const userId = c.req.param('id')
@@ -37,5 +38,18 @@ export class UserController {
     if (error) return c.json({ success: false }, error.code)
 
     return c.json({ success: true, data: updatedUser }, 200)
+  }
+
+  getVideos = async (c: Context<AppEnvironment>) => {
+    const userId = c.req.param('userId')
+    if (!userId) return c.json({ success: false, message: 'User ID is required' }, 400)
+
+    const [error, videos] = await withLogging('Get user videos', { userId }, () =>
+      this.videoService.getVideosByUserId(userId)
+    )
+
+    if (error) return c.json({ success: false, message: error.message }, error.code)
+
+    return c.json({ success: true, data: videos }, 200)
   }
 }

@@ -24,12 +24,14 @@ export const createContainer = (env: AppEnvironment['Bindings']): Container => {
 
   const userRepository = new UserRepository(db)
   const userService = new UserService(userRepository)
-  const userController = new UserController(userService)
-
-  const aiService = new AIService(ai)
 
   const videoRepository = new VideoRepository(db)
   const videoService = new VideoService(videoRepository)
+
+  const userController = new UserController(userService, videoService)
+
+  const aiService = new AIService(ai)
+
   const videoController = new VideoController(videoService)
 
   const transcribeService = new TranscribeService(aiService)
