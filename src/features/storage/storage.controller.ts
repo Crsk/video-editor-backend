@@ -4,6 +4,7 @@ import { env } from 'hono/adapter'
 import { withLogging } from '../../utils/with-logging'
 import { ProjectService } from '../project/domain/project.service'
 import { newVideo } from '../video/domain/new-video'
+import { v7 as uuid } from 'uuid'
 
 export class StorageController {
   constructor(private storageService: StorageService, private projectService: ProjectService) {}
@@ -38,7 +39,7 @@ export class StorageController {
     if (!upload) return c.json({ success: false, message: 'Failed to upload video' }, 500)
 
     for (const url of upload.urls) {
-      const validVideo = newVideo({ id: crypto.randomUUID(), videoUrl: url })
+      const validVideo = newVideo({ id: uuid(), videoUrl: url })
       const [videoError] = await withLogging('Create video entry', { projectId, videoUrl: url }, () =>
         this.projectService.addVideoToProject({ projectId, videoData: validVideo })
       )
