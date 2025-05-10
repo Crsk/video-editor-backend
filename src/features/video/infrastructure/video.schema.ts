@@ -1,6 +1,5 @@
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod'
-import { sqliteTable, text } from 'drizzle-orm/sqlite-core'
-import { user } from '../../user/infrastructure/user.schema'
+import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
 import { z } from 'zod'
 
 export const video = sqliteTable('video', {
@@ -8,9 +7,8 @@ export const video = sqliteTable('video', {
   transcript: text('transcript'),
   audioUrls: text('audio_urls'),
   videoUrl: text('video_url').notNull(),
-  userId: text('user_id')
-    .notNull()
-    .references(() => user.id)
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull()
 })
 
 export const insertVideoSchema = createInsertSchema(video).extend({

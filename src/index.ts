@@ -17,32 +17,29 @@ app.use('*', diContainerMiddleware())
 
 const apiRouter = new Hono<AppEnvironment>()
 const userRouter = new Hono<AppEnvironment>()
-const videoRouter = new Hono<AppEnvironment>()
+const projectRouter = new Hono<AppEnvironment>()
 const transcribeRouter = new Hono<AppEnvironment>()
 const storageRouter = new Hono<AppEnvironment>()
 
-// /api/users
 userRouter.get('/', c => c.get('container').userController.getAllUsers(c))
-userRouter.get('/:id', c => c.get('container').userController.getUserById(c))
-userRouter.put('/:id', c => c.get('container').userController.updateUser(c))
-userRouter.get('/:userId/videos', c => c.get('container').userController.getVideos(c))
+userRouter.get('/:userId', c => c.get('container').userController.getUserById(c))
+userRouter.put('/:userId', c => c.get('container').userController.updateUser(c))
+userRouter.get('/:userId/projects', c => c.get('container').userController.getUserProjects(c))
 
-// /api/videos
-videoRouter.get('/', c => c.get('container').videoController.getAllVideos(c))
-videoRouter.post('/', c => c.get('container').videoController.createVideo(c))
-videoRouter.get('/:id', c => c.get('container').videoController.getVideoById(c))
-videoRouter.put('/:id', c => c.get('container').videoController.updateVideo(c))
-videoRouter.delete('/:id', c => c.get('container').videoController.deleteVideo(c))
+projectRouter.get('/', c => c.get('container').projectController.getAllProjects(c))
+projectRouter.get('/:projectId', c => c.get('container').projectController.getProjectById(c))
+projectRouter.get('/:projectId/videos', c => c.get('container').projectController.getProjectVideos(c))
+projectRouter.get('/:projectId/videos/:videoId', c => c.get('container').projectController.getProjectVideo(c))
+projectRouter.put('/:projectId', c => c.get('container').projectController.upsertProject(c))
+projectRouter.delete('/:projectId', c => c.get('container').projectController.deleteProject(c))
+projectRouter.put('/:projectId/videos/:videoId', c => c.get('container').projectController.addVideoToProject(c))
 
-// /api/transcribe
 transcribeRouter.post('/', c => c.get('container').transcribeController.transcribeMedia(c))
 
-// /api/storage
-storageRouter.post('/', async c => await c.get('container').storageController.upload(c))
+storageRouter.post('/', async c => await c.get('container').storageController.uploadVideos(c))
 
-// /api
 apiRouter.route('/users', userRouter)
-apiRouter.route('/videos', videoRouter)
+apiRouter.route('/projects', projectRouter)
 apiRouter.route('/transcribe', transcribeRouter)
 apiRouter.route('/storage', storageRouter)
 
