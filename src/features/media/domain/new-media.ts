@@ -1,11 +1,11 @@
-import { CreateVideo } from './video.entity'
+import { CreateMedia } from './media.entity'
 
-export const newVideo = ({ id, ...props }: { id: string } & Partial<CreateVideo>): CreateVideo => {
+export const newMedia = ({ id, ...props }: { id: string } & Partial<CreateMedia>): CreateMedia => {
   return {
     id,
     transcript: props?.transcript || '',
     audioUrls: props?.audioUrls || '',
-    videoUrl: props?.videoUrl || '',
+    url: props?.url || '',
     createdAt: props?.createdAt || new Date(),
     updatedAt: props?.updatedAt || new Date()
   }

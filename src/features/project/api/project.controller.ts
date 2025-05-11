@@ -30,31 +30,31 @@ export class ProjectController {
     return c.json({ success: true, data: project })
   }
 
-  getProjectVideos = async (c: Context<AppEnvironment>) => {
+  getProjectMedia = async (c: Context<AppEnvironment>) => {
     const projectId = c.req.param('projectId')
 
-    const [error, videos] = await withLogging('Fetching videos by project id', { projectId }, () =>
-      this.projectService.getProjectVideos({ projectId })
+    const [error, media] = await withLogging('Fetching media by project id', { projectId }, () =>
+      this.projectService.getProjectMedia({ projectId })
     )
 
     if (error) return c.json({ success: false, message: error.message }, error.code)
-    if (!videos) return c.json({ success: false, message: 'Videos not found' }, 404)
+    if (!media) return c.json({ success: false, message: 'Media not found' }, 404)
 
-    return c.json({ success: true, data: videos })
+    return c.json({ success: true, data: media })
   }
 
-  getProjectVideo = async (c: Context<AppEnvironment>) => {
+  getProjectSingleMedia = async (c: Context<AppEnvironment>) => {
     const projectId = c.req.param('projectId')
-    const videoId = c.req.param('videoId')
+    const mediaId = c.req.param('mediaId')
 
-    const [error, video] = await withLogging('Fetching video by id', { projectId, videoId }, () =>
-      this.projectService.getProjectVideo({ projectId, videoId })
+    const [error, media] = await withLogging('Fetching media by id', { projectId, mediaId }, () =>
+      this.projectService.getProjectSingleMedia({ projectId, mediaId })
     )
 
     if (error) return c.json({ success: false, message: error.message }, error.code)
-    if (!video) return c.json({ success: false, message: 'Video not found' }, 404)
+    if (!media) return c.json({ success: false, message: 'Media not found' }, 404)
 
-    return c.json({ success: true, data: video })
+    return c.json({ success: true, data: media })
   }
 
   upsertProject = async (c: Context<AppEnvironment>) => {
@@ -86,16 +86,16 @@ export class ProjectController {
     return c.json({ success: true })
   }
 
-  addVideoToProject = async (c: Context<AppEnvironment>) => {
+  addMediaToProject = async (c: Context<AppEnvironment>) => {
     const projectId = c.req.param('projectId')
-    const videoData = await c.req.json()
+    const mediaData = await c.req.json()
 
-    const [error, success] = await withLogging('Adding video to project', { projectId, videoData }, () =>
-      this.projectService.addVideoToProject({ projectId, videoData })
+    const [error, success] = await withLogging('Adding media to project', { projectId, mediaData }, () =>
+      this.projectService.addMediaToProject({ projectId, mediaData })
     )
 
     if (error) return c.json({ success: false, message: error.message }, error.code)
-    if (!success) return c.json({ success: false, message: 'Project or video not found' }, 404)
+    if (!success) return c.json({ success: false, message: 'Project or media not found' }, 404)
 
     return c.json({ success: true })
   }

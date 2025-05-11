@@ -3,13 +3,13 @@ import { StorageService } from './storage.service'
 import { env } from 'hono/adapter'
 import { withLogging } from '../../utils/with-logging'
 import { ProjectService } from '../project/domain/project.service'
-import { newVideo } from '../video/domain/new-video'
+import { newMedia } from '../media/domain/new-media'
 import { v7 as uuid } from 'uuid'
 
 export class StorageController {
   constructor(private storageService: StorageService, private projectService: ProjectService) {}
 
-  uploadVideos = async (c: Context) => {
+  uploadMedia = async (c: Context) => {
     const formData = await c.req.formData()
     const files = formData.getAll('files') as File[]
     if (!files || files.length === 0) return c.json({ success: false, message: 'Missing media files to upload' }, 400)
@@ -35,15 +35,15 @@ export class StorageController {
       if (projectError) return c.json({ success: false, message: 'Failed to create project' }, projectError.code)
     }
 
-    if (uploadError) return c.json({ success: false, message: 'Failed to upload video' }, uploadError.code)
-    if (!upload) return c.json({ success: false, message: 'Failed to upload video' }, 500)
+    if (uploadError) return c.json({ success: false, message: 'Failed to upload media' }, uploadError.code)
+    if (!upload) return c.json({ success: false, message: 'Failed to upload media' }, 500)
 
     for (const url of upload.urls) {
-      const validVideo = newVideo({ id: uuid(), videoUrl: url })
-      const [videoError] = await withLogging('Create video entry', { projectId, videoUrl: url }, () =>
-        this.projectService.addVideoToProject({ projectId, videoData: validVideo })
+      const validMedia = newMedia({ id: uuid(), url })
+      const [mediaError] = await withLogging('Create media entry', { projectId, mediaUrl: url }, () =>
+        this.projectService.addMediaToProject({ projectId, mediaData: validMedia })
       )
-      if (videoError) return c.json({ success: false, message: 'Failed to create video' }, videoError.code)
+      if (mediaError) return c.json({ success: false, message: 'Failed to create media' }, mediaError.code)
     }
 
     return c.json({ success: true, data: { urls: upload.urls } })

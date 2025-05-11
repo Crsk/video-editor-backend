@@ -1,7 +1,7 @@
 import { Project } from './project.entity'
 import { ProjectRepository } from '../infrastructure/project.repository'
 import { Response } from '../../../utils/attempt/http'
-import { CreateVideo, Video } from '../../video/domain/video.entity'
+import { CreateMedia, Media } from '../../media/domain/media.entity'
 import { UpdateProject } from '../domain/project.entity'
 import { newProject } from './new-project'
 
@@ -16,18 +16,18 @@ export class ProjectService {
     return this.projectRepository.getProjectById(projectId)
   }
 
-  async getProjectVideos({ projectId }: { projectId: string }): Promise<Response<Video[]>> {
-    return this.projectRepository.getProjectVideos(projectId)
+  async getProjectMedia({ projectId }: { projectId: string }): Promise<Response<Media[]>> {
+    return this.projectRepository.getProjectMedia(projectId)
   }
 
-  async getProjectVideo({
+  async getProjectSingleMedia({
     projectId,
-    videoId
+    mediaId
   }: {
     projectId: string
-    videoId: string
-  }): Promise<Response<Video | undefined>> {
-    return this.projectRepository.getProjectVideo(projectId, videoId)
+    mediaId: string
+  }): Promise<Response<Media | undefined>> {
+    return this.projectRepository.getProjectSingleMedia(projectId, mediaId)
   }
 
   async upsertProject({
@@ -47,13 +47,13 @@ export class ProjectService {
     return this.projectRepository.deleteProject(projectId)
   }
 
-  async addVideoToProject({
+  async addMediaToProject({
     projectId,
-    videoData
+    mediaData
   }: {
     projectId: string
-    videoData: CreateVideo
+    mediaData: CreateMedia
   }): Promise<Response<boolean>> {
-    return this.projectRepository.addVideoToProject(projectId, videoData)
+    return this.projectRepository.addMediaToProject(projectId, mediaData)
   }
 }

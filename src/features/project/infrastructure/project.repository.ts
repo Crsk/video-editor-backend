@@ -3,9 +3,9 @@ import { eq, and } from 'drizzle-orm'
 import { project } from './project.schema'
 import { Project } from '../domain/project.entity'
 import { attempt, type Response } from '../../../utils/attempt/http'
-import { CreateVideo, Video } from '../../video/domain/video.entity'
-import { videoToProject } from './video_to_project.schema'
-import { video } from '../../video/infrastructure/video.schema'
+import { CreateMedia, Media } from '../../media/domain/media.entity'
+import { mediaToProject } from './media_to_project.schema'
+import { media } from '../../media/infrastructure/media.schema'
 import { userToProject } from './user_to_project.schema'
 
 export class ProjectRepository {
@@ -23,31 +23,31 @@ export class ProjectRepository {
     return attempt(db.select().from(project).where(eq(project.id, id)).get())
   }
 
-  async getProjectVideos(id: string): Promise<Response<Video[]>> {
+  async getProjectMedia(id: string): Promise<Response<Media[]>> {
     const db = drizzle(this.db)
 
     return attempt(
       db
         .select()
-        .from(videoToProject)
-        .leftJoin(video, eq(videoToProject.videoId, video.id))
-        .where(eq(videoToProject.projectId, id))
+        .from(mediaToProject)
+        .leftJoin(media, eq(mediaToProject.mediaId, media.id))
+        .where(eq(mediaToProject.projectId, id))
         .all()
-        .then(results => results.map(({ video }) => video).filter(video => !!video))
+        .then(results => results.map(({ media }) => media).filter(media => !!media))
     )
   }
 
-  async getProjectVideo(projectId: string, videoId: string): Promise<Response<Video | undefined>> {
+  async getProjectSingleMedia(projectId: string, mediaId: string): Promise<Response<Media | undefined>> {
     const db = drizzle(this.db)
 
     return attempt(
       db
         .select()
-        .from(videoToProject)
-        .innerJoin(video, eq(videoToProject.videoId, video.id))
-        .where(and(eq(videoToProject.projectId, projectId), eq(video.id, videoId)))
+        .from(mediaToProject)
+        .innerJoin(media, eq(mediaToProject.mediaId, media.id))
+        .where(and(eq(mediaToProject.projectId, projectId), eq(media.id, mediaId)))
         .get()
-        .then(result => result?.video)
+        .then(result => result?.media)
     )
   }
 
@@ -94,14 +94,14 @@ export class ProjectRepository {
     )
   }
 
-  async addVideoToProject(projectId: string, videoData: CreateVideo): Promise<Response<boolean>> {
+  async addMediaToProject(projectId: string, mediaData: CreateMedia): Promise<Response<boolean>> {
     const db = drizzle(this.db)
 
     return attempt(
       db
         .batch([
-          db.insert(video).values(videoData),
-          db.insert(videoToProject).values({ projectId, videoId: videoData.id })
+          db.insert(media).values(mediaData),
+          db.insert(mediaToProject).values({ projectId, mediaId: mediaData.id })
         ])
         .then(([result1, result2]) => {
           if (result1.success && result2.success) return true

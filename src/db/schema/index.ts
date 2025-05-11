@@ -1,5 +1,5 @@
 export { account, session, user, verification } from '../../features/auth/infrastructure/auth.schema'
-export { video } from '../../features/video/infrastructure/video.schema'
+export { media } from '../../features/media/infrastructure/media.schema'
 export { project } from '../../features/project/infrastructure/project.schema'
 export { userToProject } from '../../features/project/infrastructure/user_to_project.schema'
-export { videoToProject } from '../../features/project/infrastructure/video_to_project.schema'
+export { mediaToProject } from '../../features/project/infrastructure/media_to_project.schema'

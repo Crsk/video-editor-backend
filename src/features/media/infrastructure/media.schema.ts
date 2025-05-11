@@ -2,19 +2,19 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'driz
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
 import { z } from 'zod'
 
-export const video = sqliteTable('video', {
+export const media = sqliteTable('media', {
   id: text('id').primaryKey(),
   transcript: text('transcript'),
   audioUrls: text('audio_urls'),
-  videoUrl: text('video_url').notNull(),
+  url: text('url').notNull(),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull()
 })
 
-export const insertVideoSchema = createInsertSchema(video).extend({
-  videoUrl: z.string().url()
+export const insertMediaSchema = createInsertSchema(media).extend({
+  url: z.string().url()
 })
-export const selectVideoSchema = createSelectSchema(video)
-export const updateVideoSchema = createUpdateSchema(video).extend({
-  videoUrl: z.string().url().optional()
+export const selectMediaSchema = createSelectSchema(media)
+export const updateMediaSchema = createUpdateSchema(media).extend({
+  url: z.string().url().optional()
 })

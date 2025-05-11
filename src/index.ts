@@ -28,15 +28,15 @@ userRouter.get('/:userId/projects', c => c.get('container').userController.getUs
 
 projectRouter.get('/', c => c.get('container').projectController.getAllProjects(c))
 projectRouter.get('/:projectId', c => c.get('container').projectController.getProjectById(c))
-projectRouter.get('/:projectId/videos', c => c.get('container').projectController.getProjectVideos(c))
-projectRouter.get('/:projectId/videos/:videoId', c => c.get('container').projectController.getProjectVideo(c))
+projectRouter.get('/:projectId/media', c => c.get('container').projectController.getProjectMedia(c))
+projectRouter.get('/:projectId/media/:mediaId', c => c.get('container').projectController.getProjectSingleMedia(c))
 projectRouter.put('/:projectId', c => c.get('container').projectController.upsertProject(c))
 projectRouter.delete('/:projectId', c => c.get('container').projectController.deleteProject(c))
-projectRouter.put('/:projectId/videos/:videoId', c => c.get('container').projectController.addVideoToProject(c))
+projectRouter.put('/:projectId/media/:mediaId', c => c.get('container').projectController.addMediaToProject(c))
 
 transcribeRouter.post('/', c => c.get('container').transcribeController.transcribeMedia(c))
 
-storageRouter.post('/', async c => await c.get('container').storageController.uploadVideos(c))
+storageRouter.post('/', async c => await c.get('container').storageController.uploadMedia(c))
 
 apiRouter.route('/users', userRouter)
 apiRouter.route('/projects', projectRouter)
