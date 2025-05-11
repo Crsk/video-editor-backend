@@ -13,6 +13,9 @@ export class StorageController {
     const formData = await c.req.formData()
     const files = formData.getAll('files') as File[]
     if (!files || files.length === 0) return c.json({ success: false, message: 'Missing media files to upload' }, 400)
+    const supportedFormats = ['.mp3', '.mp4']
+    const isSupportedFormat = files.every(file => supportedFormats.some(format => file.name.endsWith(format)))
+    if (!isSupportedFormat) return c.json({ success: false, message: 'Unsupported media format' }, 400)
 
     const userId = formData.get('userId') as string
     const projectId = formData.get('projectId') as string
