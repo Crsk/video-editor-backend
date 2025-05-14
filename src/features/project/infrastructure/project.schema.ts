@@ -4,14 +4,14 @@ import { z } from 'zod'
 
 export const project = sqliteTable('project', {
   id: text('id').primaryKey(),
-  name: text('name').notNull(),
-  description: text('description'),
+  name: text('name'),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull()
 })
 
 export const insertProjectSchema = createInsertSchema(project).extend({
   id: z.string().uuid(),
+  name: z.string().optional(),
   createdAt: z.undefined(),
   updatedAt: z.undefined()
 })

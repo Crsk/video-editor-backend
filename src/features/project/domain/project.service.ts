@@ -3,7 +3,6 @@ import { ProjectRepository } from '../infrastructure/project.repository'
 import { Response } from '../../../utils/attempt/http'
 import { CreateMedia, Media } from '../../media/domain/media.entity'
 import { CreateProject } from '../domain/project.entity'
-import { newProject } from './new-project'
 
 export class ProjectService {
   constructor(private projectRepository: ProjectRepository) {}

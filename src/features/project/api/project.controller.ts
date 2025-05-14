@@ -3,8 +3,7 @@ import { ProjectService } from '../domain/project.service'
 import { AppEnvironment } from '../../../core/types/environment'
 import { withLogging } from '../../../utils/with-logging'
 import { insertProjectSchema } from '../infrastructure/project.schema'
-import { newProject } from '../domain/new-project'
-import { getAuth } from '../../../core/auth'
+import { CreateProject } from '../domain/project.entity'
 
 export class ProjectController {
   constructor(private projectService: ProjectService) {}
@@ -63,7 +62,7 @@ export class ProjectController {
     const projectId = c.req.param('projectId')
     const userId = c.get('userId')
     const projectData = await c.req.json()
-    const validData = insertProjectSchema.parse({ ...projectData, id: projectId })
+    const validData: CreateProject = insertProjectSchema.parse({ ...projectData, id: projectId })
 
     const [error, updatedProject] = await withLogging('Inserting project', { projectId, projectData }, () =>
       this.projectService.upsertProject({ projectId, userId, projectData: validData })

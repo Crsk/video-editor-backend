@@ -5,7 +5,7 @@ import { withLogging } from '../../utils/with-logging'
 import { ProjectService } from '../project/domain/project.service'
 import { newMedia } from '../media/domain/new-media'
 import { v7 as uuid } from 'uuid'
-import { newProject } from '../project/domain/new-project'
+import { CreateProject } from '../project/domain/project.entity'
 
 export class StorageController {
   constructor(private storageService: StorageService, private projectService: ProjectService) {}
@@ -37,7 +37,7 @@ export class StorageController {
         this.projectService.upsertProject({
           projectId,
           userId,
-          projectData: newProject({ id: projectId, name: 'Demo', description: 'Try it out!' })
+          projectData: { id: projectId, name: 'Demo' } as CreateProject
         })
       )
       if (projectError) return c.json({ success: false, message: 'Failed to create project' }, projectError.code)
