@@ -10,6 +10,10 @@ export const project = sqliteTable('project', {
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull()
 })
 
-export const insertProjectSchema = createInsertSchema(project)
+export const insertProjectSchema = createInsertSchema(project).extend({
+  id: z.string().uuid(),
+  createdAt: z.undefined(),
+  updatedAt: z.undefined()
+})
 export const selectProjectSchema = createSelectSchema(project)
 export const updateProjectSchema = createUpdateSchema(project)

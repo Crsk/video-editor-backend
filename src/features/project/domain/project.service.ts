@@ -2,7 +2,7 @@ import { Project } from './project.entity'
 import { ProjectRepository } from '../infrastructure/project.repository'
 import { Response } from '../../../utils/attempt/http'
 import { CreateMedia, Media } from '../../media/domain/media.entity'
-import { UpdateProject } from '../domain/project.entity'
+import { CreateProject } from '../domain/project.entity'
 import { newProject } from './new-project'
 
 export class ProjectService {
@@ -37,10 +37,9 @@ export class ProjectService {
   }: {
     projectId: string
     userId: string
-    projectData: UpdateProject
+    projectData: CreateProject
   }): Promise<Response<boolean>> {
-    const validProject = newProject({ id: projectId, ...projectData })
-    return this.projectRepository.upsertProject({ projectId, userId, projectData: validProject })
+    return this.projectRepository.upsertProject({ projectId, userId, projectData })
   }
 
   async deleteProject({ projectId }: { projectId: string }): Promise<Response<boolean>> {

@@ -1,11 +1,12 @@
 import 'dotenv/config'
 import { Hono } from 'hono'
 import { AppEnvironment } from './core/types/environment'
-import { authHandler } from './features/auth/auth'
+import { authHandler } from './core/auth'
 import { tryCatchMiddleware } from './core/middlewares/try-catch'
 import { corsMiddleware } from './core/middlewares/cors'
 import { authCorsMiddleware } from './core/middlewares/cors'
 import { diContainerMiddleware } from './core/middlewares/di-container'
+import { authMiddleware } from './core/auth'
 
 const app = new Hono<AppEnvironment>()
 
@@ -13,6 +14,7 @@ app.use('*', tryCatchMiddleware())
 app.use('/api/*', corsMiddleware())
 app.use('/api/auth/**', authCorsMiddleware())
 app.use('/api/auth/**', authHandler)
+app.use('/api/*', authMiddleware())
 app.use('*', diContainerMiddleware())
 
 const apiRouter = new Hono<AppEnvironment>()

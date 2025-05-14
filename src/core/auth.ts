@@ -1,9 +1,9 @@
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import type { Context } from 'hono'
-import * as schema from './infrastructure/auth.schema'
+import * as schema from '../features/auth/infrastructure/auth.schema'
 import { drizzle } from 'drizzle-orm/d1'
-import { AppEnvironment } from '../../core/types/environment'
+import { AppEnvironment } from './types/environment'
 import { env } from 'hono/adapter'
 
 const authInstanceCache = new WeakMap()
@@ -55,11 +55,20 @@ export const getAuth = (c: Context<AppEnvironment>) => {
 
 export const authMiddleware = () => {
   return async (c: Context<AppEnvironment>, next: () => Promise<any>) => {
-    c.set('auth', getAuth(c))
+    const session = await getAuth(c).api.getSession({ headers: c.req.raw.headers })
+    console.log('Session:', session)
+    console.log('Cookies:', c.req.header('cookie'))
+
+    if (!session?.user) {
+      console.log('Unauthorized: No valid session found')
+      return c.json({ success: false, message: 'Unauthorized' }, 401)
+    }
+
+    c.set('userId', session.user.id)
+
     await next()
   }
 }
-
 export const authHandler = (c: Context<AppEnvironment>) => {
   const auth = getAuth(c)
 

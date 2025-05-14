@@ -25,7 +25,7 @@ export const authCorsMiddleware = () => {
     },
     allowHeaders: ['Content-Type', 'Authorization'],
     allowMethods: ['POST', 'GET', 'OPTIONS'],
-    exposeHeaders: ['Content-Length'],
+    exposeHeaders: ['Content-Length', 'Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials'],
     maxAge: 600,
     credentials: true
   })

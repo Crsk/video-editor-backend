@@ -2,7 +2,9 @@ import { Context } from 'hono'
 import { ProjectService } from '../domain/project.service'
 import { AppEnvironment } from '../../../core/types/environment'
 import { withLogging } from '../../../utils/with-logging'
-import { updateProjectSchema } from '../infrastructure/project.schema'
+import { insertProjectSchema } from '../infrastructure/project.schema'
+import { newProject } from '../domain/new-project'
+import { getAuth } from '../../../core/auth'
 
 export class ProjectController {
   constructor(private projectService: ProjectService) {}
@@ -59,11 +61,11 @@ export class ProjectController {
 
   upsertProject = async (c: Context<AppEnvironment>) => {
     const projectId = c.req.param('projectId')
-    const userId = c.req.param('userId')
+    const userId = c.get('userId')
     const projectData = await c.req.json()
-    const validData = updateProjectSchema.parse(projectData)
+    const validData = insertProjectSchema.parse({ ...projectData, id: projectId })
 
-    const [error, updatedProject] = await withLogging('Updating project', { projectId, projectData }, () =>
+    const [error, updatedProject] = await withLogging('Inserting project', { projectId, projectData }, () =>
       this.projectService.upsertProject({ projectId, userId, projectData: validData })
     )
 

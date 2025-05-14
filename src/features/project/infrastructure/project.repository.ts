@@ -1,7 +1,7 @@
 import { drizzle } from 'drizzle-orm/d1'
 import { eq, and } from 'drizzle-orm'
 import { project } from './project.schema'
-import { Project } from '../domain/project.entity'
+import { CreateProject, Project } from '../domain/project.entity'
 import { attempt, type Response } from '../../../utils/attempt/http'
 import { CreateMedia, Media } from '../../media/domain/media.entity'
 import { mediaToProject } from './media_to_project.schema'
@@ -58,7 +58,7 @@ export class ProjectRepository {
   }: {
     projectId: string
     userId: string
-    projectData: any
+    projectData: CreateProject
   }): Promise<Response<boolean>> {
     const db = drizzle(this.db)
 
@@ -67,17 +67,14 @@ export class ProjectRepository {
         .batch([
           db
             .insert(project)
-            .values({ id: projectId, ...projectData })
+            .values({ ...projectData, createdAt: new Date(), updatedAt: new Date() })
             .onConflictDoUpdate({
               target: project.id,
-              set: projectData
+              set: { ...projectData, updatedAt: new Date() }
             }),
           db.insert(userToProject).values({ userId, projectId }).onConflictDoNothing()
         ])
-        .then(([result1, result2]) => {
-          if (result1.success && result2.success) return true
-          return false
-        })
+        .then(([result1, result2]) => result1.success && result2.success)
     )
   }
 

@@ -5,7 +5,7 @@ export const newProject = ({ id, ...props }: { id: string } & Partial<CreateProj
     id,
     name: props?.name || '',
     description: props?.description || '',
-    createdAt: props?.createdAt || new Date(),
-    updatedAt: props?.updatedAt || new Date()
+    createdAt: undefined,
+    updatedAt: undefined
   }
 }
