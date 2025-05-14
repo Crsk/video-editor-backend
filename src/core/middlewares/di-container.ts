@@ -1,5 +1,5 @@
 import { AppEnvironment } from '../../core/types/environment'
-import { createContainer } from '../../di/container'
+import { createContainer } from '../middlewares/container'
 import { Context } from 'hono'
 
 export const diContainerMiddleware = () => {
