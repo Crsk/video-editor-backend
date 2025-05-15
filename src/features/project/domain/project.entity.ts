@@ -4,3 +4,4 @@ import { insertProjectSchema, selectProjectSchema, updateProjectSchema } from '.
 export type Project = z.infer<typeof selectProjectSchema>
 export type CreateProject = z.infer<typeof insertProjectSchema>
 export type UpdateProject = z.infer<typeof updateProjectSchema>
+export type DeleteProject = { projectId: string }

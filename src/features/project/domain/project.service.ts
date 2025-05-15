@@ -1,4 +1,4 @@
-import { Project } from './project.entity'
+import { DeleteProject, Project } from './project.entity'
 import { ProjectRepository } from '../infrastructure/project.repository'
 import { Response } from '../../../utils/attempt/http'
 import { CreateMedia, Media } from '../../media/domain/media.entity'
@@ -41,8 +41,8 @@ export class ProjectService {
     return this.projectRepository.upsertProject({ projectId, userId, projectData })
   }
 
-  async deleteProject({ projectId }: { projectId: string }): Promise<Response<boolean>> {
-    return this.projectRepository.deleteProject(projectId)
+  async deleteProject({ projectId }: DeleteProject): Promise<Response<boolean>> {
+    return this.projectRepository.deleteProject({ projectId })
   }
 
   async addMediaToProject({
@@ -52,6 +52,6 @@ export class ProjectService {
     projectId: string
     mediaData: CreateMedia
   }): Promise<Response<boolean>> {
-    return this.projectRepository.addMediaToProject(projectId, mediaData)
+    return this.projectRepository.addMediaToProject({ projectId, mediaData })
   }
 }

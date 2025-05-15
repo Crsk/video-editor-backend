@@ -1,7 +1,7 @@
 import { drizzle } from 'drizzle-orm/d1'
 import { eq, and } from 'drizzle-orm'
 import { project } from './project.schema'
-import { CreateProject, Project } from '../domain/project.entity'
+import { CreateProject, DeleteProject, Project } from '../domain/project.entity'
 import { attempt, type Response } from '../../../utils/attempt/http'
 import { CreateMedia, Media } from '../../media/domain/media.entity'
 import { mediaToProject } from './media_to_project.schema'
@@ -78,20 +78,26 @@ export class ProjectRepository {
     )
   }
 
-  async deleteProject(id: string): Promise<Response<boolean>> {
+  async deleteProject({ projectId }: DeleteProject): Promise<Response<boolean>> {
     const db = drizzle(this.db)
 
     return attempt(
       db
         .delete(project)
-        .where(eq(project.id, id))
+        .where(eq(project.id, projectId))
         .returning()
         .get()
         .then(data => !!data)
     )
   }
 
-  async addMediaToProject(projectId: string, mediaData: CreateMedia): Promise<Response<boolean>> {
+  async addMediaToProject({
+    projectId,
+    mediaData
+  }: {
+    projectId: string
+    mediaData: CreateMedia
+  }): Promise<Response<boolean>> {
     const db = drizzle(this.db)
 
     return attempt(
