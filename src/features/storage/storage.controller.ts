@@ -18,10 +18,11 @@ export class StorageController {
     const isSupportedFormat = files.every(file => supportedFormats.some(format => file.name.endsWith(format)))
     if (!isSupportedFormat) return c.json({ success: false, message: 'Unsupported media format' }, 400)
 
-    const userId = formData.get('userId') as string
+    const userId = c.get('userId')
     const workspaceId = formData.get('workspaceId') as string
+
     const { BUCKET_PUBLIC_URL } = env<{ BUCKET_PUBLIC_URL: string }>(c)
-    const path = `recordings/${userId}`
+    const path = `recordings/${userId}/${workspaceId}`
     const [uploadError, upload] = await withLogging(
       'Upload files',
       { userId, workspaceId, fileCount: files.length },
@@ -37,7 +38,7 @@ export class StorageController {
         this.workspaceService.upsertWorkspace({
           workspaceId,
           userId,
-          workspaceData: { id: workspaceId, name: 'Demo' } as CreateWorkspace
+          workspaceData: { id: workspaceId, name: 'Untitled' } as CreateWorkspace
         })
       )
       if (workspaceError) return c.json({ success: false, message: 'Failed to create workspace' }, workspaceError.code)
