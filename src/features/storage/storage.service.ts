@@ -24,4 +24,20 @@ export class StorageService {
 
     return [new HttpError('BAD_REQUEST', 'No files uploaded'), null]
   }
+
+  async deleteWorkspaceFiles(userId: string, workspaceId: string): Promise<Response<boolean>> {
+    const prefix = `recordings/${userId}/${workspaceId}/`
+
+    const objects = await this.env.R2.list({ prefix })
+
+    if (objects.objects.length === 0) return [null, true]
+
+    const deletePromises = objects.objects.map(obj => attempt(this.env.R2.delete(obj.key)))
+    const results = await Promise.all(deletePromises)
+    const hasErrors = results.some(([error]) => error !== null)
+
+    if (hasErrors) return [new HttpError('INTERNAL_ERROR', 'Failed to delete some workspace files'), null]
+
+    return [null, true]
+  }
 }

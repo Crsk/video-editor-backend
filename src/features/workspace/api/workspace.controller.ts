@@ -1,5 +1,5 @@
 import { Context } from 'hono'
-import { WorkspaceService } from '../domain/workspace.service'
+import { type WorkspaceService } from '../domain/workspace.service'
 import { AppEnvironment } from '../../../core/types/environment'
 import { withLogging } from '../../../utils/with-logging'
 import { insertWorkspaceSchema } from '../infrastructure/workspace.schema'
@@ -76,9 +76,10 @@ export class WorkspaceController {
 
   deleteWorkspace = async (c: Context<AppEnvironment>) => {
     const workspaceId = c.req.param('workspaceId')
+    const userId = c.get('userId')
 
-    const [error, success] = await withLogging('Deleting workspace', { workspaceId }, () =>
-      this.workspaceService.deleteWorkspace({ workspaceId })
+    const [error, success] = await withLogging('Deleting workspace', { workspaceId, userId }, () =>
+      this.workspaceService.deleteWorkspace({ workspaceId, userId })
     )
 
     if (error) return c.json({ success: false, message: error.message }, error.code)

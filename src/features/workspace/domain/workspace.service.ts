@@ -1,11 +1,12 @@
 import { DeleteWorkspace, Workspace } from './workspace.entity'
-import { WorkspaceRepository } from '../infrastructure/workspace.repository'
+import { type WorkspaceRepository } from '../infrastructure/workspace.repository'
 import { Response } from '../../../utils/attempt/http'
 import { CreateMedia, Media } from '../../media/domain/media.entity'
 import { CreateWorkspace } from './workspace.entity'
+import { type StorageService } from '../../storage/storage.service'
 
 export class WorkspaceService {
-  constructor(private workspaceRepository: WorkspaceRepository) {}
+  constructor(private workspaceRepository: WorkspaceRepository, private storageService: StorageService) {}
 
   async getAllWorkspaces(): Promise<Response<Workspace[]>> {
     return this.workspaceRepository.getAllWorkspaces()
@@ -41,7 +42,13 @@ export class WorkspaceService {
     return this.workspaceRepository.upsertWorkspace({ workspaceId, userId, workspaceData })
   }
 
-  async deleteWorkspace({ workspaceId }: DeleteWorkspace): Promise<Response<boolean>> {
+  async deleteWorkspace({ workspaceId, userId }: DeleteWorkspace & { userId?: string }): Promise<Response<boolean>> {
+    if (this.storageService && userId) {
+      const [storageError] = await this.storageService.deleteWorkspaceFiles(userId, workspaceId)
+
+      if (storageError) console.error('Failed to delete workspace files:', storageError)
+    }
+
     return this.workspaceRepository.deleteWorkspace({ workspaceId })
   }
 

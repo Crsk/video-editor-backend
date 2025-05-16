@@ -32,11 +32,12 @@ export const createContainer = (env: AppEnvironment['Bindings']): Container => {
   const transcribeService = new TranscribeService(aiService)
   const transcribeController = new TranscribeController(transcribeService)
 
+  const storageService = new StorageService(env)
+
   const workspaceRepository = new WorkspaceRepository(db)
-  const workspaceService = new WorkspaceService(workspaceRepository)
+  const workspaceService = new WorkspaceService(workspaceRepository, storageService)
   const workspaceController = new WorkspaceController(workspaceService)
 
-  const storageService = new StorageService(env)
   const storageController = new StorageController(storageService, workspaceService)
 
   return {

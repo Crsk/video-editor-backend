@@ -1,5 +1,5 @@
 import { drizzle } from 'drizzle-orm/d1'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, inArray } from 'drizzle-orm'
 import { workspace } from './workspace.schema'
 import { CreateWorkspace, DeleteWorkspace, Workspace } from '../domain/workspace.entity'
 import { attempt, type Response } from '../../../utils/attempt/http'
@@ -81,13 +81,26 @@ export class WorkspaceRepository {
   async deleteWorkspace({ workspaceId }: DeleteWorkspace): Promise<Response<boolean>> {
     const db = drizzle(this.db)
 
+    // Avoiding Transaction due to https://github.com/drizzle-team/drizzle-orm/issues/2463
+    // Internally it cascade deletes user_to_workspace and media_to_workspace
     return attempt(
       db
-        .delete(workspace)
-        .where(eq(workspace.id, workspaceId))
-        .returning()
-        .get()
-        .then(data => !!data)
+        .batch([
+          db
+            .delete(media)
+            .where(
+              inArray(
+                media.id,
+                db
+                  .select({ id: media.id })
+                  .from(media)
+                  .innerJoin(mediaToWorkspace, eq(media.id, mediaToWorkspace.mediaId))
+                  .where(eq(mediaToWorkspace.workspaceId, workspaceId))
+              )
+            ),
+          db.delete(workspace).where(eq(workspace.id, workspaceId))
+        ])
+        .then(([result1, result2]) => result1.success && result2.success)
     )
   }
 
