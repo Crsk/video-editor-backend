@@ -2,13 +2,13 @@ import { Context } from 'hono'
 import { StorageService } from './storage.service'
 import { env } from 'hono/adapter'
 import { withLogging } from '../../utils/with-logging'
-import { ProjectService } from '../project/domain/project.service'
+import { WorkspaceService } from '../workspace/domain/workspace.service'
 import { newMedia } from '../media/domain/new-media'
 import { v7 as uuid } from 'uuid'
-import { CreateProject } from '../project/domain/project.entity'
+import { CreateWorkspace } from '../workspace/domain/workspace.entity'
 
 export class StorageController {
-  constructor(private storageService: StorageService, private projectService: ProjectService) {}
+  constructor(private storageService: StorageService, private workspaceService: WorkspaceService) {}
 
   uploadMedia = async (c: Context) => {
     const formData = await c.req.formData()
@@ -19,28 +19,28 @@ export class StorageController {
     if (!isSupportedFormat) return c.json({ success: false, message: 'Unsupported media format' }, 400)
 
     const userId = formData.get('userId') as string
-    const projectId = formData.get('projectId') as string
+    const workspaceId = formData.get('workspaceId') as string
     const { BUCKET_PUBLIC_URL } = env<{ BUCKET_PUBLIC_URL: string }>(c)
     const path = `recordings/${userId}`
     const [uploadError, upload] = await withLogging(
       'Upload files',
-      { userId, projectId, fileCount: files.length },
+      { userId, workspaceId, fileCount: files.length },
       () => this.storageService.upload(files, BUCKET_PUBLIC_URL, path)
     )
 
-    const [project] = await withLogging('Get project', { projectId }, () =>
-      this.projectService.getProjectById({ projectId })
+    const [workspace] = await withLogging('Get workspace', { workspaceId }, () =>
+      this.workspaceService.getWorkspaceById({ workspaceId })
     )
 
-    if (!project) {
-      const [projectError] = await withLogging('Create project', { projectId }, () =>
-        this.projectService.upsertProject({
-          projectId,
+    if (!workspace) {
+      const [workspaceError] = await withLogging('Create workspace', { workspaceId }, () =>
+        this.workspaceService.upsertWorkspace({
+          workspaceId,
           userId,
-          projectData: { id: projectId, name: 'Demo' } as CreateProject
+          workspaceData: { id: workspaceId, name: 'Demo' } as CreateWorkspace
         })
       )
-      if (projectError) return c.json({ success: false, message: 'Failed to create project' }, projectError.code)
+      if (workspaceError) return c.json({ success: false, message: 'Failed to create workspace' }, workspaceError.code)
     }
 
     if (uploadError) return c.json({ success: false, message: 'Failed to upload media' }, uploadError.code)
@@ -48,8 +48,8 @@ export class StorageController {
 
     for (const url of upload.urls) {
       const validMedia = newMedia({ id: uuid(), url })
-      const [mediaError] = await withLogging('Create media entry', { projectId, mediaUrl: url }, () =>
-        this.projectService.addMediaToProject({ projectId, mediaData: validMedia })
+      const [mediaError] = await withLogging('Create media entry', { workspaceId, mediaUrl: url }, () =>
+        this.workspaceService.addMediaToWorkspace({ workspaceId, mediaData: validMedia })
       )
       if (mediaError) return c.json({ success: false, message: 'Failed to create media' }, mediaError.code)
     }

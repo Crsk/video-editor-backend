@@ -39,14 +39,14 @@ export class UserController {
     return c.json({ success: true, data: updatedUser }, 200)
   }
 
-  getUserProjects = async (c: Context<AppEnvironment>) => {
+  getUserWorkspaces = async (c: Context<AppEnvironment>) => {
     const userId = c.req.param('userId')
-    const [error, projects] = await withLogging('Get user projects', { userId }, () =>
-      this.userService.getUserProjects({ userId })
+    const [error, workspaces] = await withLogging('Get user workspaces', { userId }, () =>
+      this.userService.getUserWorkspaces({ userId })
     )
 
     if (error) return c.json({ success: false }, error.code)
 
-    return c.json({ success: true, data: projects }, 200)
+    return c.json({ success: true, data: workspaces }, 200)
   }
 }

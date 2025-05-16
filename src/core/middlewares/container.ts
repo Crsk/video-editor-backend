@@ -7,13 +7,13 @@ import { TranscribeController } from '../../features/transcribe/api/transcribe.c
 import { AppEnvironment } from '../../core/types/environment'
 import { StorageService } from '../../features/storage/storage.service'
 import { StorageController } from '../../features/storage/storage.controller'
-import { ProjectController } from '../../features/project/api/project.controller'
-import { ProjectService } from '../../features/project/domain/project.service'
-import { ProjectRepository } from '../../features/project/infrastructure/project.repository'
+import { WorkspaceController } from '../../features/workspace/api/workspace.controller'
+import { WorkspaceService } from '../../features/workspace/domain/workspace.service'
+import { WorkspaceRepository } from '../../features/workspace/infrastructure/workspace.repository'
 
 export type Container = {
   userController: UserController
-  projectController: ProjectController
+  workspaceController: WorkspaceController
   transcribeController: TranscribeController
   storageController: StorageController
 }
@@ -32,17 +32,17 @@ export const createContainer = (env: AppEnvironment['Bindings']): Container => {
   const transcribeService = new TranscribeService(aiService)
   const transcribeController = new TranscribeController(transcribeService)
 
-  const projectRepository = new ProjectRepository(db)
-  const projectService = new ProjectService(projectRepository)
-  const projectController = new ProjectController(projectService)
+  const workspaceRepository = new WorkspaceRepository(db)
+  const workspaceService = new WorkspaceService(workspaceRepository)
+  const workspaceController = new WorkspaceController(workspaceService)
 
   const storageService = new StorageService(env)
-  const storageController = new StorageController(storageService, projectService)
+  const storageController = new StorageController(storageService, workspaceService)
 
   return {
     userController,
     transcribeController,
     storageController,
-    projectController
+    workspaceController
   }
 }
