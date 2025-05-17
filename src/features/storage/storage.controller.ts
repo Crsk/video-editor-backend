@@ -47,14 +47,17 @@ export class StorageController {
     if (uploadError) return c.json({ success: false, message: 'Failed to upload media' }, uploadError.code)
     if (!upload) return c.json({ success: false, message: 'Failed to upload media' }, 500)
 
+    const result: { url: string; mediaId: string }[] = []
     for (const url of upload.urls) {
-      const validMedia = newMedia({ id: uuid(), url })
+      const id = uuid()
+      const validMedia = newMedia({ id, url })
       const [mediaError] = await withLogging('Create media entry', { workspaceId, mediaUrl: url }, () =>
         this.workspaceService.addMediaToWorkspace({ workspaceId, mediaData: validMedia })
       )
       if (mediaError) return c.json({ success: false, message: 'Failed to create media' }, mediaError.code)
+      result.push({ url, mediaId: id })
     }
 
-    return c.json({ success: true, data: { urls: upload.urls } })
+    return c.json({ success: true, data: result })
   }
 }
