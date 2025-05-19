@@ -5,18 +5,24 @@ import { v7 as uuid } from 'uuid'
 export class StorageService {
   constructor(private env: AppEnvironment['Bindings']) {}
 
-  async upload(files: File[], bucketUrl: string, path: string): Promise<Response<{ id: string; url: string }[]>> {
-    const uploadData: { id: string; url: string }[] = []
+  async upload(
+    files: File[],
+    bucketUrl: string,
+    path: string
+  ): Promise<Response<{ id: string; url: string; type: 'audio' | 'video' }[]>> {
+    const uploadData: { id: string; url: string; type: 'audio' | 'video' }[] = []
 
     for (const file of files) {
       const id = uuid()
       const filePath = `${path}/${id}`
+      const type = file.type.startsWith('video') ? 'video' : file.name.endsWith('.mp4') ? 'video' : 'audio' // TODO support more types
+      console.log('type', type)
       const [error, data] = await attempt(this.env.R2.put(filePath, file))
 
       if (error || !data) return [error, null]
 
       const url = `${bucketUrl}/${filePath}`
-      uploadData.push({ id, url })
+      uploadData.push({ id, url, type })
     }
 
     if (uploadData.length > 0) return [null, uploadData]
