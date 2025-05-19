@@ -61,4 +61,8 @@ export class WorkspaceService {
   }): Promise<Response<boolean>> {
     return this.workspaceRepository.addMediaToWorkspace({ workspaceId, mediaData })
   }
+
+  async deleteMedia({ workspaceId, mediaId }: { workspaceId: string; mediaId: string }): Promise<Response<boolean>> {
+    return this.workspaceRepository.deleteMedia({ workspaceId, mediaId })
+  }
 }

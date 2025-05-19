@@ -1,26 +1,25 @@
 import { AppEnvironment } from '../../core/types/environment'
-import { dateId } from '../../utils/date-id'
 import { attempt, HttpError, Response } from '../../utils/attempt/http'
+import { v7 as uuid } from 'uuid'
 
 export class StorageService {
   constructor(private env: AppEnvironment['Bindings']) {}
 
-  async upload(files: File[], bucketUrl: string, path: string): Promise<Response<{ urls: string[] }>> {
-    const urls: string[] = []
+  async upload(files: File[], bucketUrl: string, path: string): Promise<Response<{ id: string; url: string }[]>> {
+    const uploadData: { id: string; url: string }[] = []
 
     for (const file of files) {
-      const id = dateId()
-      const fileName = `${id}_${file.name}`
-      const filePath = `${path}/${fileName}`
+      const id = uuid()
+      const filePath = `${path}/${id}`
       const [error, data] = await attempt(this.env.R2.put(filePath, file))
 
       if (error || !data) return [error, null]
 
       const url = `${bucketUrl}/${filePath}`
-      urls.push(url)
+      uploadData.push({ id, url })
     }
 
-    if (urls.length > 0) return [null, { urls }]
+    if (uploadData.length > 0) return [null, uploadData]
 
     return [new HttpError('BAD_REQUEST', 'No files uploaded'), null]
   }
@@ -39,5 +38,19 @@ export class StorageService {
     if (hasErrors) return [new HttpError('INTERNAL_ERROR', 'Failed to delete some workspace files'), null]
 
     return [null, true]
+  }
+
+  async deleteMedia({
+    userId,
+    workspaceId,
+    mediaId
+  }: {
+    userId: string
+    workspaceId: string
+    mediaId: string
+  }): Promise<Response<boolean>> {
+    const prefix = `recordings/${userId}/${workspaceId}/${mediaId}`
+
+    return attempt(this.env.R2.delete(prefix)).then(([error]) => [error, !error])
   }
 }

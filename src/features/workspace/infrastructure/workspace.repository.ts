@@ -125,4 +125,15 @@ export class WorkspaceRepository {
         })
     )
   }
+
+  async deleteMedia({ workspaceId, mediaId }: { workspaceId: string; mediaId: string }): Promise<Response<boolean>> {
+    const db = drizzle(this.db)
+
+    return attempt(
+      db
+        .delete(mediaToWorkspace)
+        .where(and(eq(mediaToWorkspace.workspaceId, workspaceId), eq(mediaToWorkspace.mediaId, mediaId)))
+        .then(result => result.success)
+    )
+  }
 }

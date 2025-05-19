@@ -4,7 +4,6 @@ import { env } from 'hono/adapter'
 import { withLogging } from '../../utils/with-logging'
 import { type WorkspaceService } from '../workspace/domain/workspace.service'
 import { newMedia } from '../media/domain/new-media'
-import { v7 as uuid } from 'uuid'
 import { CreateWorkspace } from '../workspace/domain/workspace.entity'
 
 export class StorageController {
@@ -48,8 +47,7 @@ export class StorageController {
     if (!upload) return c.json({ success: false, message: 'Failed to upload media' }, 500)
 
     const result: { url: string; mediaId: string }[] = []
-    for (const url of upload.urls) {
-      const id = uuid()
+    for (const { url, id } of upload) {
       const validMedia = newMedia({ id, url })
       const [mediaError] = await withLogging('Create media entry', { workspaceId, mediaUrl: url }, () =>
         this.workspaceService.addMediaToWorkspace({ workspaceId, mediaData: validMedia })
@@ -59,5 +57,28 @@ export class StorageController {
     }
 
     return c.json({ success: true, data: result })
+  }
+
+  deleteMedia = async (c: Context) => {
+    const body = await c.req.json<{ workspaceId: string; userId: string; mediaId: string }>()
+    const { userId, workspaceId, mediaId } = body
+
+    if (!userId || !workspaceId || !mediaId)
+      return c.json({ success: false, message: 'Missing media ID, workspace ID, or user ID' }, 400)
+
+    const [error, success] = await withLogging('Deleting media', { userId, workspaceId, mediaId }, () =>
+      this.storageService.deleteMedia({ userId, workspaceId, mediaId })
+    )
+
+    if (error) return c.json({ success: false, message: error.message }, error.code)
+    if (!success) return c.json({ success: false, message: 'Media not found' }, 404)
+
+    const [mediaError, mediaSuccess] = await withLogging('Delete media entry', { workspaceId, mediaId }, () =>
+      this.workspaceService.deleteMedia({ workspaceId, mediaId })
+    )
+    if (mediaError) return c.json({ success: false, message: mediaError.message }, mediaError.code)
+    if (!mediaSuccess) return c.json({ success: false, message: 'Media not found' }, 404)
+
+    return c.json({ success })
   }
 }
