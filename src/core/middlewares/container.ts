@@ -2,8 +2,8 @@ import { UserRepository } from '../../features/user/infrastructure/user.reposito
 import { UserService } from '../../features/user/domain/user.service'
 import { UserController } from '../../features/user/api/user.controller'
 import { AIService } from '../../features/ai/ai.service'
-import { TranscribeService } from '../../features/transcribe/domain/transcribe.service'
-import { TranscribeController } from '../../features/transcribe/api/transcribe.controller'
+import { TranscriptService } from '../../features/transcript/domain/transcript.service'
+import { TranscriptController } from '../../features/transcript/api/transcript.controller'
 import { AppEnvironment } from '../../core/types/environment'
 import { StorageService } from '../../features/storage/storage.service'
 import { StorageController } from '../../features/storage/storage.controller'
@@ -14,7 +14,7 @@ import { WorkspaceRepository } from '../../features/workspace/infrastructure/wor
 export type Container = {
   userController: UserController
   workspaceController: WorkspaceController
-  transcribeController: TranscribeController
+  transcriptController: TranscriptController
   storageController: StorageController
 }
 
@@ -29,8 +29,8 @@ export const createContainer = (env: AppEnvironment['Bindings']): Container => {
 
   const aiService = new AIService(ai)
 
-  const transcribeService = new TranscribeService(aiService)
-  const transcribeController = new TranscribeController(transcribeService)
+  const transcriptService = new TranscriptService(aiService)
+  const transcriptController = new TranscriptController(transcriptService)
 
   const storageService = new StorageService(env)
 
@@ -42,7 +42,7 @@ export const createContainer = (env: AppEnvironment['Bindings']): Container => {
 
   return {
     userController,
-    transcribeController,
+    transcriptController,
     storageController,
     workspaceController
   }

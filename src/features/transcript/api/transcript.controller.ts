@@ -1,10 +1,10 @@
 import { Context } from 'hono'
-import { TranscribeService } from '../domain/transcribe.service'
+import { TranscriptService } from '../domain/transcript.service'
 import { AppEnvironment } from '../../../core/types/environment'
 import { withLogging } from '../../../utils/with-logging'
 
-export class TranscribeController {
-  constructor(private transcribeService: TranscribeService) {}
+export class TranscriptController {
+  constructor(private transcriptService: TranscriptService) {}
 
   transcribeMedia = async (c: Context<AppEnvironment>) => {
     const formData = await c.req.formData()
@@ -17,7 +17,7 @@ export class TranscribeController {
     const mediaArray = [...new Uint8Array(mediaBuffer)]
 
     const [error, text] = await withLogging('Transcribing media', { mediaFile, mediaArray }, () =>
-      this.transcribeService.transcribeMedia(mediaArray)
+      this.transcriptService.transcribeMedia(mediaArray)
     )
 
     if (error) return c.json({ success: false, message: error.message }, error.code)
