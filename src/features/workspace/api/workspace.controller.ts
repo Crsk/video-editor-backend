@@ -100,13 +100,14 @@ export class WorkspaceController {
     if (error) return c.json({ success: false, message: error.message }, error.code)
     if (!success) return c.json({ success: false, message: 'Workspace or media not found' }, 404)
 
-    const [transcribeError, transcribedText] = await withLogging('Transcribing media', { workspaceId, mediaData }, () =>
-      this.transcriptService.transcribeMedia(mediaData)
-    )
+    if (mediaData.url && mediaData.id) {
+      const [transcribeError] = await withLogging('Transcribing media', { workspaceId, mediaData }, () =>
+        this.transcriptService.transcribeMedia({ mediaId: mediaData.id, url: mediaData.url })
+      )
 
-    if (transcribeError) return c.json({ success: false, message: transcribeError.message }, transcribeError.code)
-    if (!transcribedText) return c.json({ success: false, message: 'Media not found' }, 404)
+      if (transcribeError) console.error('Transcription failed:', transcribeError)
+    }
 
-    return c.json({ success: true, data: { transcribedText } })
+    return c.json({ success: true, data: mediaData })
   }
 }

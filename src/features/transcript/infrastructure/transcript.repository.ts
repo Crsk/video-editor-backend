@@ -1,7 +1,8 @@
 import { drizzle } from 'drizzle-orm/d1'
-import { attempt, type Response } from '../../../utils/attempt/http'
-import { CreateTranscript } from '../domain/transcript.entity'
+import { attempt, type Response, HttpError } from '../../../utils/attempt/http'
+import { CreateTranscript, Transcript } from '../domain/transcript.entity'
 import { transcript } from './transcript.schema'
+import { eq } from 'drizzle-orm'
 
 export class TranscriptRepository {
   constructor(private db: D1Database) {}
@@ -20,7 +21,13 @@ export class TranscriptRepository {
               set: { ...transcriptData, updatedAt: new Date() }
             })
         ])
-        .then(([result1]) => result1.success)
+        .then(([result]) => result.success)
     )
+  }
+
+  async getTranscriptByMediaId(mediaId: string): Promise<Response<Transcript | undefined>> {
+    const db = drizzle(this.db)
+
+    return attempt(db.select().from(transcript).where(eq(transcript.mediaId, mediaId)).get())
   }
 }
