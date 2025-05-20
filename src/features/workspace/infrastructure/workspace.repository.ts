@@ -131,9 +131,13 @@ export class WorkspaceRepository {
 
     return attempt(
       db
-        .delete(mediaToWorkspace)
-        .where(and(eq(mediaToWorkspace.workspaceId, workspaceId), eq(mediaToWorkspace.mediaId, mediaId)))
-        .then(result => result.success)
+        .batch([
+          db
+            .delete(mediaToWorkspace)
+            .where(and(eq(mediaToWorkspace.workspaceId, workspaceId), eq(mediaToWorkspace.mediaId, mediaId))),
+          db.delete(media).where(eq(media.id, mediaId))
+        ])
+        .then(([result1, result2]) => result1.success && result2.success)
     )
   }
 }
