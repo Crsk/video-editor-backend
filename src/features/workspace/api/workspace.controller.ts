@@ -4,9 +4,10 @@ import { AppEnvironment } from '../../../core/types/environment'
 import { withLogging } from '../../../utils/with-logging'
 import { insertWorkspaceSchema } from '../infrastructure/workspace.schema'
 import { CreateWorkspace } from '../domain/workspace.entity'
+import { type TranscriptService } from '../../../features/transcript/domain/transcript.service'
 
 export class WorkspaceController {
-  constructor(private workspaceService: WorkspaceService) {}
+  constructor(private workspaceService: WorkspaceService, private transcriptService: TranscriptService) {}
 
   getAllWorkspaces = async (c: Context<AppEnvironment>) => {
     const [error, allWorkspaces] = await withLogging('Fetching all workspaces', {}, () =>
@@ -99,6 +100,13 @@ export class WorkspaceController {
     if (error) return c.json({ success: false, message: error.message }, error.code)
     if (!success) return c.json({ success: false, message: 'Workspace or media not found' }, 404)
 
-    return c.json({ success: true })
+    const [transcribeError, transcribedText] = await withLogging('Transcribing media', { workspaceId, mediaData }, () =>
+      this.transcriptService.transcribeMedia(mediaData)
+    )
+
+    if (transcribeError) return c.json({ success: false, message: transcribeError.message }, transcribeError.code)
+    if (!transcribedText) return c.json({ success: false, message: 'Media not found' }, 404)
+
+    return c.json({ success: true, data: { transcribedText } })
   }
 }

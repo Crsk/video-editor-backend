@@ -10,6 +10,7 @@ import { StorageController } from '../../features/storage/storage.controller'
 import { WorkspaceController } from '../../features/workspace/api/workspace.controller'
 import { WorkspaceService } from '../../features/workspace/domain/workspace.service'
 import { WorkspaceRepository } from '../../features/workspace/infrastructure/workspace.repository'
+import { TranscriptRepository } from '../../features/transcript/infrastructure/transcript.repository'
 
 export type Container = {
   userController: UserController
@@ -29,16 +30,17 @@ export const createContainer = (env: AppEnvironment['Bindings']): Container => {
 
   const aiService = new AIService(ai)
 
-  const transcriptService = new TranscriptService(aiService)
+  const transcriptRepository = new TranscriptRepository(db)
+  const transcriptService = new TranscriptService(aiService, transcriptRepository)
   const transcriptController = new TranscriptController(transcriptService)
 
   const storageService = new StorageService(env)
 
   const workspaceRepository = new WorkspaceRepository(db)
   const workspaceService = new WorkspaceService(workspaceRepository, storageService)
-  const workspaceController = new WorkspaceController(workspaceService)
+  const workspaceController = new WorkspaceController(workspaceService, transcriptService)
 
-  const storageController = new StorageController(storageService, workspaceService)
+  const storageController = new StorageController(storageService, workspaceService, transcriptService)
 
   return {
     userController,

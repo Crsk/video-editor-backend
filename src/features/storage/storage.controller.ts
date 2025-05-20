@@ -5,9 +5,14 @@ import { withLogging } from '../../utils/with-logging'
 import { type WorkspaceService } from '../workspace/domain/workspace.service'
 import { newMedia } from '../media/domain/new-media'
 import { CreateWorkspace } from '../workspace/domain/workspace.entity'
+import { type TranscriptService } from '../transcript/domain/transcript.service'
 
 export class StorageController {
-  constructor(private storageService: StorageService, private workspaceService: WorkspaceService) {}
+  constructor(
+    private storageService: StorageService,
+    private workspaceService: WorkspaceService,
+    private transcriptService: TranscriptService
+  ) {}
 
   uploadMedia = async (c: Context) => {
     const formData = await c.req.formData()
@@ -16,6 +21,11 @@ export class StorageController {
     const supportedFormats = ['.mp3', '.mp4']
     const isSupportedFormat = files.every(file => supportedFormats.some(format => file.name.endsWith(format)))
     if (!isSupportedFormat) return c.json({ success: false, message: 'Unsupported media format' }, 400)
+
+    for (const file of files) {
+      if (!file || !(file instanceof Blob))
+        return c.json({ success: false, message: 'Missing media blob to transcribe' }, 400)
+    }
 
     const userId = c.get('userId')
     const workspaceId = formData.get('workspaceId') as string
@@ -53,6 +63,13 @@ export class StorageController {
         this.workspaceService.addMediaToWorkspace({ workspaceId, mediaData: validMedia })
       )
       if (mediaError) return c.json({ success: false, message: 'Failed to create media' }, mediaError.code)
+
+      const [transcribeError] = await withLogging('Transcribing media', { mediaUrl: url }, () =>
+        this.transcriptService.transcribeMedia({ mediaId: id, url })
+      )
+      if (transcribeError)
+        return c.json({ success: false, message: 'Failed to transcribe media' }, transcribeError.code)
+
       result.push({ url, mediaId: id, type })
     }
 
