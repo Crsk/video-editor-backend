@@ -20,7 +20,6 @@ app.use('*', diContainerMiddleware())
 const apiRouter = new Hono<AppEnvironment>()
 const userRouter = new Hono<AppEnvironment>()
 const workspaceRouter = new Hono<AppEnvironment>()
-const transcribeRouter = new Hono<AppEnvironment>()
 const storageRouter = new Hono<AppEnvironment>()
 
 userRouter.get('/', c => c.get('container').userController.getAllUsers(c))
@@ -38,14 +37,11 @@ workspaceRouter.put('/:workspaceId', c => c.get('container').workspaceController
 workspaceRouter.delete('/:workspaceId', c => c.get('container').workspaceController.deleteWorkspace(c))
 workspaceRouter.put('/:workspaceId/media/:mediaId', c => c.get('container').workspaceController.addMediaToWorkspace(c))
 
-transcribeRouter.post('/', c => c.get('container').transcriptController.transcribeMedia(c))
-
 storageRouter.post('/', async c => await c.get('container').storageController.uploadMedia(c))
 storageRouter.delete('/', c => c.get('container').storageController.deleteMedia(c))
 
 apiRouter.route('/users', userRouter)
 apiRouter.route('/workspaces', workspaceRouter)
-apiRouter.route('/transcribe', transcribeRouter)
 apiRouter.route('/storage', storageRouter)
 
 app.route('/api', apiRouter)
