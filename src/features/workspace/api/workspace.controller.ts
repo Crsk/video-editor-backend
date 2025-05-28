@@ -34,9 +34,10 @@ export class WorkspaceController {
 
   getWorkspaceMedia = async (c: Context<AppEnvironment>) => {
     const workspaceId = c.req.param('workspaceId')
+    const includeTranscript = c.req.query('include') === 'transcript'
 
-    const [error, media] = await withLogging('Fetching media by workspace id', { workspaceId }, () =>
-      this.workspaceService.getWorkspaceMedia({ workspaceId })
+    const [error, media] = await withLogging('Fetching media by workspace id', { workspaceId, includeTranscript }, () =>
+      this.workspaceService.getWorkspaceMedia({ workspaceId, includeTranscript })
     )
 
     if (error) return c.json({ success: false, message: error.message }, error.code)
@@ -48,9 +49,10 @@ export class WorkspaceController {
   getWorkspaceSingleMedia = async (c: Context<AppEnvironment>) => {
     const workspaceId = c.req.param('workspaceId')
     const mediaId = c.req.param('mediaId')
+    const includeTranscript = c.req.query('include') === 'transcript'
 
-    const [error, media] = await withLogging('Fetching media by id', { workspaceId, mediaId }, () =>
-      this.workspaceService.getWorkspaceSingleMedia({ workspaceId, mediaId })
+    const [error, media] = await withLogging('Fetching media by id', { workspaceId, mediaId, includeTranscript }, () =>
+      this.workspaceService.getWorkspaceSingleMedia({ workspaceId, mediaId, includeTranscript })
     )
 
     if (error) return c.json({ success: false, message: error.message }, error.code)

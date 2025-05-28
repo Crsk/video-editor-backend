@@ -4,9 +4,15 @@ import { Response } from '../../../utils/attempt/http'
 import { CreateMedia, Media } from '../../media/domain/media.entity'
 import { CreateWorkspace } from './workspace.entity'
 import { type StorageService } from '../../storage/storage.service'
+import { type TranscriptService } from '../../transcript/domain/transcript.service'
+import { Transcript } from '../../transcript/domain/transcript.entity'
 
 export class WorkspaceService {
-  constructor(private workspaceRepository: WorkspaceRepository, private storageService: StorageService) {}
+  constructor(
+    private workspaceRepository: WorkspaceRepository,
+    private storageService: StorageService,
+    private transcriptService: TranscriptService
+  ) {}
 
   async getAllWorkspaces(): Promise<Response<Workspace[]>> {
     return this.workspaceRepository.getAllWorkspaces()
@@ -16,18 +22,56 @@ export class WorkspaceService {
     return this.workspaceRepository.getWorkspaceById(workspaceId)
   }
 
-  async getWorkspaceMedia({ workspaceId }: { workspaceId: string }): Promise<Response<Media[]>> {
-    return this.workspaceRepository.getWorkspaceMedia(workspaceId)
+  async getWorkspaceMedia({
+    workspaceId,
+    includeTranscript
+  }: {
+    workspaceId: string
+    includeTranscript?: boolean
+  }): Promise<Response<(Media & { transcript?: Transcript })[]>> {
+    const [error, mediaItems] = await this.workspaceRepository.getWorkspaceMedia(workspaceId)
+
+    if (error || !mediaItems || !includeTranscript || !this.transcriptService) {
+      return [error, mediaItems as (Media & { transcript?: Transcript })[]]
+    }
+
+    const mediaWithTranscripts = await Promise.all(
+      mediaItems.map(async mediaItem => {
+        const [transcriptError, transcript] = await this.transcriptService!.getTranscriptByMediaId(mediaItem.id)
+        return {
+          ...mediaItem,
+          transcript: transcriptError || transcript === null ? undefined : transcript
+        }
+      })
+    )
+
+    return [null, mediaWithTranscripts]
   }
 
   async getWorkspaceSingleMedia({
     workspaceId,
-    mediaId
+    mediaId,
+    includeTranscript
   }: {
     workspaceId: string
     mediaId: string
-  }): Promise<Response<Media | undefined>> {
-    return this.workspaceRepository.getWorkspaceSingleMedia(workspaceId, mediaId)
+    includeTranscript?: boolean
+  }): Promise<Response<(Media & { transcript?: Transcript }) | undefined>> {
+    const [error, mediaItem] = await this.workspaceRepository.getWorkspaceSingleMedia(workspaceId, mediaId)
+
+    if (error || !mediaItem || !includeTranscript || !this.transcriptService) {
+      return [error, mediaItem as Media & { transcript?: Transcript }]
+    }
+
+    const [transcriptError, transcript] = await this.transcriptService.getTranscriptByMediaId(mediaId)
+
+    return [
+      null,
+      {
+        ...mediaItem,
+        transcript: transcriptError || transcript === null ? undefined : transcript
+      }
+    ]
   }
 
   async upsertWorkspace({

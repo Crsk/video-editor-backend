@@ -37,7 +37,7 @@ export const createContainer = (env: AppEnvironment['Bindings']): Container => {
   const storageService = new StorageService(env)
 
   const workspaceRepository = new WorkspaceRepository(db)
-  const workspaceService = new WorkspaceService(workspaceRepository, storageService)
+  const workspaceService = new WorkspaceService(workspaceRepository, storageService, transcriptService)
   const workspaceController = new WorkspaceController(workspaceService, transcriptService)
 
   const storageController = new StorageController(storageService, workspaceService, transcriptService)
