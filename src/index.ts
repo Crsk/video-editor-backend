@@ -37,7 +37,7 @@ workspaceRouter.put('/:workspaceId', c => c.get('container').workspaceController
 workspaceRouter.delete('/:workspaceId', c => c.get('container').workspaceController.deleteWorkspace(c))
 workspaceRouter.put('/:workspaceId/media/:mediaId', c => c.get('container').workspaceController.addMediaToWorkspace(c))
 
-storageRouter.post('/', async c => await c.get('container').storageController.uploadMedia(c))
+storageRouter.post('/', c => c.get('container').storageController.uploadMedia(c))
 storageRouter.delete('/', c => c.get('container').storageController.deleteMedia(c))
 
 apiRouter.route('/users', userRouter)

@@ -10,7 +10,9 @@ export const transcript = sqliteTable('transcript', {
   text: text('text'),
   wordCount: integer('word_count'),
   vtt: text('vtt'),
+  // @deprecated
   words: text('words', { mode: 'json' }),
+  segments: text('segments', { mode: 'json' }),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull()
 })

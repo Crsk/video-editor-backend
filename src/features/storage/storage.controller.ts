@@ -88,8 +88,8 @@ export class StorageController {
 
       if (mediaError) return [mediaError, null]
 
-      const [transcribeError] = await withLogging('Transcribing media', { mediaUrl: url }, () =>
-        this.transcriptService.transcribeMedia({ mediaId: id, url })
+      const [transcribeError] = await withLogging('Transcribing media V3', { mediaUrl: url }, () =>
+        this.transcriptService.transcribeMediaV3({ mediaId: id, url })
       )
 
       if (transcribeError) return [transcribeError, null]
