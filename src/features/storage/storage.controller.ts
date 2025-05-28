@@ -4,7 +4,6 @@ import { env } from 'hono/adapter'
 import { withLogging } from '../../utils/with-logging'
 import { type WorkspaceService } from '../workspace/domain/workspace.service'
 import { newMedia } from '../media/domain/new-media'
-import { CreateWorkspace } from '../workspace/domain/workspace.entity'
 import { type TranscriptService } from '../transcript/domain/transcript.service'
 import { HttpError } from '../../utils/attempt/http'
 
@@ -32,9 +31,6 @@ export class StorageController {
     const userId = c.get('userId')
     const workspaceId = formData.get('workspaceId') as string
 
-    const [workspaceError] = await this.ensureWorkspaceExists(workspaceId, userId)
-    if (workspaceError) return c.json({ success: false, message: workspaceError.message }, workspaceError.code)
-
     const { BUCKET_PUBLIC_URL } = env<{ BUCKET_PUBLIC_URL: string }>(c)
     const path = `recordings/${userId}/${workspaceId}`
     const [uploadError, upload] = await withLogging(
@@ -52,28 +48,6 @@ export class StorageController {
     return c.json({ success: true, data: processedFiles })
   }
 
-  private async ensureWorkspaceExists(workspaceId: string, userId: string): Promise<[HttpError | null, boolean]> {
-    const [getError, workspace] = await withLogging('Get workspace', { workspaceId }, () =>
-      this.workspaceService.getWorkspaceById({ workspaceId })
-    )
-
-    if (getError) return [getError, false]
-    if (workspace) return [null, true]
-
-    const [createError, created] = await withLogging('Create workspace', { workspaceId }, () =>
-      this.workspaceService.upsertWorkspace({
-        workspaceId,
-        userId,
-        workspaceData: { id: workspaceId, name: 'Untitled' } as CreateWorkspace
-      })
-    )
-
-    if (createError) return [createError, false]
-    if (!created) return [new HttpError('INTERNAL_ERROR', 'Failed to create workspace'), false]
-
-    return [null, true]
-  }
-
   private async processUploadedFiles(
     upload: { url: string; id: string; type: 'audio' | 'video' }[],
     workspaceId: string
@@ -82,6 +56,7 @@ export class StorageController {
 
     for (const { url, id, type } of upload) {
       const validMedia = newMedia({ id, url, type })
+
       const [mediaError] = await withLogging('Create media entry', { workspaceId, mediaUrl: url }, () =>
         this.workspaceService.addMediaToWorkspace({ workspaceId, mediaData: validMedia })
       )
