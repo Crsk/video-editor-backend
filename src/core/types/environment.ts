@@ -14,6 +14,8 @@ export type AppEnvironment = {
     AI: AI
     R2: R2Bucket
     R2_PUBLIC_URL: string
+    STRIPE_PUBLISHABLE_KEY: string
+    STRIPE_WEBHOOK_SECRET: string
   }
   Variables: {
     container: Container
