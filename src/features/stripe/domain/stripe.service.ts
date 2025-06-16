@@ -9,14 +9,14 @@ export class StripeService {
 
   async createCheckoutSession({
     userId,
-    priceId
+    priceId,
+    credits
   }: {
     userId: string
     priceId: string
+    credits: number
   }): Promise<Response<{ url: string | null }>> {
-    if (!process.env.STRIPE_SECRET_KEY) {
-      return [new HttpError('VALIDATION_ERROR', 'STRIPE_SECRET_KEY is not set'), null]
-    }
+    if (!process.env.STRIPE_SECRET_KEY) return [new HttpError('VALIDATION_ERROR', 'STRIPE_SECRET_KEY is not set'), null]
 
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
     const hostUrl = process.env.FRONT_URL
@@ -24,14 +24,14 @@ export class StripeService {
     const [error, session] = await attempt(
       stripe.checkout.sessions.create({
         payment_method_types: ['card'],
-        line_items: [{ price: priceId, quantity: 1 }],
+        line_items: [{ price: priceId, quantity: credits }],
         mode: 'payment',
         success_url: `${hostUrl}`,
         cancel_url: `${hostUrl}/pricing`,
         ui_mode: 'hosted',
         metadata: {
           userId,
-          credits: '100'
+          credits
         }
       })
     )

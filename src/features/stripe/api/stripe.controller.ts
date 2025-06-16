@@ -21,9 +21,9 @@ export class StripeController {
     }
 
     const userId = c.get('userId')
-    const { priceId } = requestData
+    const { priceId, credits } = requestData
 
-    const [serviceError, result] = await this.stripeService.createCheckoutSession({ userId, priceId })
+    const [serviceError, result] = await this.stripeService.createCheckoutSession({ userId, priceId, credits })
 
     if (serviceError) {
       console.error('Error creating checkout session:', serviceError)
