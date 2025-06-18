@@ -5,6 +5,8 @@ import { withLogging } from '../../../utils/with-logging'
 import { insertWorkspaceSchema } from '../infrastructure/workspace.schema'
 import { CreateWorkspace } from '../domain/workspace.entity'
 import { type TranscriptService } from '../../../features/transcript/domain/transcript.service'
+import { insertMediaSchema } from '../../media/infrastructure/media.schema'
+import { CreateMedia } from '../../media/domain/media.entity'
 
 export class WorkspaceController {
   constructor(private workspaceService: WorkspaceService, private transcriptService: TranscriptService) {}
@@ -95,8 +97,14 @@ export class WorkspaceController {
     const workspaceId = c.req.param('workspaceId')
     const mediaData = await c.req.json()
 
+    const validData: CreateMedia = insertMediaSchema.parse({
+      ...mediaData,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    })
+
     const [error, success] = await withLogging('Adding media to workspace', { workspaceId, mediaData }, () =>
-      this.workspaceService.addMediaToWorkspace({ workspaceId, mediaData })
+      this.workspaceService.addMediaToWorkspace({ workspaceId, mediaData: validData })
     )
 
     if (error) return c.json({ success: false, message: error.message }, error.code)
