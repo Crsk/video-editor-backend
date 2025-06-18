@@ -1,11 +1,11 @@
-import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core'
-import { user } from '../../auth/infrastructure/auth.schema'
+import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
+import { team } from '../../team/infrastructure/team.schema'
 
 export const credit = sqliteTable('credit', {
   id: text('id').primaryKey(),
-  userId: text('user_id')
+  teamId: text('team_id')
     .notNull()
-    .references(() => user.id, { onDelete: 'cascade' }),
+    .references(() => team.id, { onDelete: 'cascade' }),
   amount: integer('amount').notNull(),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull()
 })

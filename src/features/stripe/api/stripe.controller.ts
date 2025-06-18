@@ -20,10 +20,8 @@ export class StripeController {
       )
     }
 
-    const userId = c.get('userId')
-    const { priceId, credits } = requestData
-
-    const [serviceError, result] = await this.stripeService.createCheckoutSession({ userId, priceId, credits })
+    const { priceId, credits, teamId } = requestData
+    const [serviceError, result] = await this.stripeService.createCheckoutSession({ teamId, priceId, credits })
 
     if (serviceError) {
       console.error('Error creating checkout session:', serviceError)
@@ -90,9 +88,10 @@ export class StripeController {
     return c.json({ success: true, data }, 200)
   }
 
-  async getUserCredits(c: Context<AppEnvironment>) {
-    const userId = c.get('userId')
-    const [serviceError, result] = await this.stripeService.getUserCredits(userId)
+  async getTeamCredits(c: Context<AppEnvironment>) {
+    // TODO: only team members should be able to get team credits.
+    const teamId = c.req.param('teamId')
+    const [serviceError, result] = await this.stripeService.getTeamCredits({ teamId })
 
     if (serviceError) {
       console.error('Error getting user credits:', serviceError)

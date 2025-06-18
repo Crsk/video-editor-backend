@@ -46,7 +46,7 @@ storageRouter.post('/', c => c.get('container').storageController.uploadMedia(c)
 storageRouter.delete('/', c => c.get('container').storageController.deleteMedia(c))
 
 stripeRouter.post('/create-checkout-session', c => c.get('container').stripeController.createCheckoutSession(c))
-stripeRouter.get('/credits', c => c.get('container').stripeController.getUserCredits(c))
+stripeRouter.get('/team/:teamId/credits', c => c.get('container').stripeController.getTeamCredits(c))
 
 apiRouter.route('/users', userRouter)
 apiRouter.route('/workspaces', workspaceRouter)

@@ -7,7 +7,7 @@ import { attempt, Response } from '../../../utils/attempt/http'
 export class CreditRepository {
   constructor(private db: D1Database) {}
 
-  async getUserCreditBalance({ userId }: { userId: string }): Promise<Response<number>> {
+  async getTeamCreditBalance({ teamId }: { teamId: string }): Promise<Response<number>> {
     const db = drizzle(this.db)
 
     return attempt(
@@ -16,7 +16,7 @@ export class CreditRepository {
           totalCredits: sum(credit.amount).mapWith(Number)
         })
         .from(credit)
-        .where(eq(credit.userId, userId))
+        .where(eq(credit.teamId, teamId))
         .get()
         .then(result => result?.totalCredits || 0)
     )
@@ -25,14 +25,14 @@ export class CreditRepository {
   async createCredit({
     id,
     amount,
-    userId
+    teamId
   }: {
     id: string
     amount: number
-    userId: string
+    teamId: string
   }): Promise<Response<Credit | undefined>> {
     const db = drizzle(this.db)
 
-    return attempt(db.insert(credit).values({ id, amount, userId, createdAt: new Date() }).returning().get())
+    return attempt(db.insert(credit).values({ id, amount, teamId, createdAt: new Date() }).returning().get())
   }
 }

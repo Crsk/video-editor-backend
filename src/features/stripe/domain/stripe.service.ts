@@ -8,11 +8,11 @@ export class StripeService {
   constructor(private creditRepository: CreditRepository) {}
 
   async createCheckoutSession({
-    userId,
+    teamId,
     priceId,
     credits
   }: {
-    userId: string
+    teamId: string
     priceId: string
     credits: number
   }): Promise<Response<{ url: string | null }>> {
@@ -30,7 +30,7 @@ export class StripeService {
         cancel_url: `${hostUrl}/pricing`,
         ui_mode: 'hosted',
         metadata: {
-          userId,
+          teamId,
           credits
         }
       })
@@ -87,20 +87,20 @@ export class StripeService {
         metadata: session.metadata
       })
 
-      if (!session.metadata || !session.metadata.userId || !session.metadata.credits) {
+      if (!session.metadata || !session.metadata.teamId || !session.metadata.credits) {
         console.error('Missing required metadata in checkout session:', session.metadata)
         return [new HttpError('VALIDATION_ERROR', 'Missing required metadata in checkout session'), null]
       }
 
-      const { userId, credits } = session.metadata
+      const { teamId, credits } = session.metadata
       const creditsAmount = parseInt(credits.toString())
 
-      console.log('Creating credit record:', { userId, creditsAmount })
+      console.log('Creating credit record:', { teamId, creditsAmount })
 
-      const [error, data] = await withLogging('Create credit', { userId, credits: creditsAmount }, () =>
+      const [error, data] = await withLogging('Create credit', { teamId, credits: creditsAmount }, () =>
         this.creditRepository.createCredit({
           id: uuid(),
-          userId,
+          teamId,
           amount: creditsAmount
         })
       )
@@ -118,7 +118,7 @@ export class StripeService {
     }
   }
 
-  async getUserCredits(userId: string): Promise<Response<number>> {
-    return this.creditRepository.getUserCreditBalance({ userId })
+  async getTeamCredits({ teamId }: { teamId: string }): Promise<Response<number>> {
+    return this.creditRepository.getTeamCreditBalance({ teamId })
   }
 }
