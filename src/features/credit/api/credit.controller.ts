@@ -1,10 +1,10 @@
 import { Context } from 'hono'
 import { AppEnvironment } from '../../../core/types/environment'
-import { StripeService } from '../domain/stripe.service'
+import { CreditService } from '../domain/credit.service'
 import { attempt } from '../../../utils/attempt/http'
 
-export class StripeController {
-  constructor(private stripeService: StripeService) {}
+export class CreditController {
+  constructor(private creditService: CreditService) {}
 
   async createCheckoutSession(c: Context<AppEnvironment>) {
     const [parseError, requestData] = await attempt(c.req.json())
@@ -21,7 +21,7 @@ export class StripeController {
     }
 
     const { priceId, credits, teamId } = requestData
-    const [serviceError, result] = await this.stripeService.createCheckoutSession({ teamId, priceId, credits })
+    const [serviceError, result] = await this.creditService.createCheckoutSession({ teamId, priceId, credits })
 
     if (serviceError) {
       console.error('Error creating checkout session:', serviceError)
@@ -77,7 +77,7 @@ export class StripeController {
       return c.json({ success: false, error: 'Webhook secret not configured' }, 500)
     }
 
-    const [serviceError, data] = await this.stripeService.handleWebhook(body, signature, webhookSecret)
+    const [serviceError, data] = await this.creditService.handleWebhook(body, signature, webhookSecret)
 
     if (serviceError) {
       console.error('Webhook processing error:', serviceError)
@@ -91,7 +91,7 @@ export class StripeController {
   async getTeamCredits(c: Context<AppEnvironment>) {
     // TODO: only team members should be able to get team credits.
     const teamId = c.req.param('teamId')
-    const [serviceError, result] = await this.stripeService.getTeamCredits({ teamId })
+    const [serviceError, result] = await this.creditService.getTeamCredits({ teamId })
 
     if (serviceError) {
       console.error('Error getting user credits:', serviceError)

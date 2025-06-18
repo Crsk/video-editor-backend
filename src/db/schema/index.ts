@@ -4,4 +4,4 @@ export { workspace } from '../../features/workspace/infrastructure/workspace.sch
 export { userToWorkspace } from '../../features/workspace/infrastructure/user_to_workspace.schema'
 export { mediaToWorkspace } from '../../features/workspace/infrastructure/media_to_workspace.schema'
 export { transcript } from '../../features/transcript/infrastructure/transcript.schema'
-export { credit } from '../../features/stripe/infrastructure/credit.schema'
+export { credit } from '../../features/credit/infrastructure/credit.schema'

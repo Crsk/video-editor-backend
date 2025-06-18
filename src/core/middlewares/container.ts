@@ -11,17 +11,17 @@ import { WorkspaceController } from '../../features/workspace/api/workspace.cont
 import { WorkspaceService } from '../../features/workspace/domain/workspace.service'
 import { WorkspaceRepository } from '../../features/workspace/infrastructure/workspace.repository'
 import { TranscriptRepository } from '../../features/transcript/infrastructure/transcript.repository'
-import { StripeService } from '../../features/stripe/domain/stripe.service'
-import { StripeController } from '../../features/stripe/api/stripe.controller'
-import { CreditRepository } from '../../features/stripe/infrastructure/credit.repository'
+import { CreditService } from '../../features/credit/domain/credit.service'
+import { CreditController } from '../../features/credit/api/credit.controller'
+import { CreditRepository } from '../../features/credit/infrastructure/credit.repository'
 
 export type Container = {
   userController: UserController
   workspaceController: WorkspaceController
   transcriptController: TranscriptController
   storageController: StorageController
-  stripeService: StripeService
-  stripeController: StripeController
+  creditService: CreditService
+  creditController: CreditController
 }
 
 export const createContainer = (env: AppEnvironment['Bindings']): Container => {
@@ -48,15 +48,15 @@ export const createContainer = (env: AppEnvironment['Bindings']): Container => {
   const storageController = new StorageController(storageService, workspaceService, transcriptService)
 
   const creditRepository = new CreditRepository(db)
-  const stripeService = new StripeService(creditRepository)
-  const stripeController = new StripeController(stripeService)
+  const creditService = new CreditService(creditRepository)
+  const creditController = new CreditController(creditService)
 
   return {
     userController,
     transcriptController,
     storageController,
     workspaceController,
-    stripeService,
-    stripeController
+    creditService,
+    creditController
   }
 }

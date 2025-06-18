@@ -16,7 +16,7 @@ app.use('/api/auth/**', authCorsMiddleware())
 app.use('/api/auth/**', authHandler)
 
 app.use('/api/stripe/webhook', diContainerMiddleware())
-app.post('/api/stripe/webhook', c => c.get('container').stripeController.handleWebhook(c))
+app.post('/api/stripe/webhook', c => c.get('container').creditController.handleWebhook(c))
 
 app.use('/api/*', authMiddleware())
 app.use('*', diContainerMiddleware())
@@ -25,7 +25,7 @@ const apiRouter = new Hono<AppEnvironment>()
 const userRouter = new Hono<AppEnvironment>()
 const workspaceRouter = new Hono<AppEnvironment>()
 const storageRouter = new Hono<AppEnvironment>()
-const stripeRouter = new Hono<AppEnvironment>()
+const creditRouter = new Hono<AppEnvironment>()
 
 userRouter.get('/', c => c.get('container').userController.getAllUsers(c))
 userRouter.get('/:userId', c => c.get('container').userController.getUserById(c))
@@ -45,13 +45,13 @@ workspaceRouter.put('/:workspaceId/media/:mediaId', c => c.get('container').work
 storageRouter.post('/', c => c.get('container').storageController.uploadMedia(c))
 storageRouter.delete('/', c => c.get('container').storageController.deleteMedia(c))
 
-stripeRouter.post('/create-checkout-session', c => c.get('container').stripeController.createCheckoutSession(c))
-stripeRouter.get('/team/:teamId/credits', c => c.get('container').stripeController.getTeamCredits(c))
+creditRouter.post('/create-checkout-session', c => c.get('container').creditController.createCheckoutSession(c))
+creditRouter.get('/team/:teamId/credits', c => c.get('container').creditController.getTeamCredits(c))
 
 apiRouter.route('/users', userRouter)
 apiRouter.route('/workspaces', workspaceRouter)
 apiRouter.route('/storage', storageRouter)
-apiRouter.route('/stripe', stripeRouter)
+apiRouter.route('/credit', creditRouter)
 
 app.route('/api', apiRouter)
 

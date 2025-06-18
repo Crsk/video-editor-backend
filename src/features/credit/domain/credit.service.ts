@@ -4,7 +4,7 @@ import { HttpError, Response, attempt } from '../../../utils/attempt/http'
 import { v7 as uuid } from 'uuid'
 import { withLogging } from '../../../utils/with-logging'
 
-export class StripeService {
+export class CreditService {
   constructor(private creditRepository: CreditRepository) {}
 
   async createCheckoutSession({
