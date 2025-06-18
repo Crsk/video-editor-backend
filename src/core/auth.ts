@@ -5,6 +5,9 @@ import * as schema from '../features/auth/infrastructure/auth.schema'
 import { drizzle } from 'drizzle-orm/d1'
 import { AppEnvironment } from './types/environment'
 import { env } from 'hono/adapter'
+import { team } from '../features/team/infrastructure/team.schema'
+import { userToTeam } from '../features/team/infrastructure/user_to_team.schema'
+import type { User } from 'better-auth'
 
 const authInstanceCache = new WeakMap()
 
@@ -45,7 +48,37 @@ export const getAuth = (c: Context<AppEnvironment>) => {
     },
     secret: BETTER_AUTH_SECRET,
     baseURL: BETTER_AUTH_URL,
-    trustedOrigins: ALLOWED_ORIGINS?.split(',') || []
+    trustedOrigins: ALLOWED_ORIGINS?.split(',') || [],
+    databaseHooks: {
+      user: {
+        create: {
+          after: async (user: User) => {
+            try {
+              const teamData = {
+                id: user.id,
+                name: 'Private',
+                createdAt: new Date(),
+                updatedAt: new Date()
+              }
+
+              await db.insert(team).values(teamData)
+
+              await db.insert(userToTeam).values({
+                userId: user.id,
+                teamId: user.id
+              })
+
+              console.log(`Successfully created private team for user ${user.id}`)
+            } catch (error) {
+              console.error(`Failed to create private team for user ${user.id}:`, error)
+              throw new Error(
+                `Failed to create private team: ${error instanceof Error ? error.message : 'Unknown error'}`
+              )
+            }
+          }
+        }
+      }
+    }
   })
 
   authInstanceCache.set(d1db, authInstance)
