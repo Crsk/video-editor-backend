@@ -1,13 +1,14 @@
-import { User, UpdateUser } from './user.entity'
-import { UserRepository } from '../infrastructure/user.repository'
-import { Response } from '../../../utils/attempt/http'
-import { Workspace } from '../../workspace/domain/workspace.entity'
+import type { User, UpdateUser } from './user.entity'
+import type { UserRepository } from '../infrastructure/user.repository'
+import type { Response } from '../../../utils/attempt/http'
+import type { Workspace } from '../../workspace/domain/workspace.entity'
+import type { Team } from '../../team/domain/team.entity'
 
 export class UserService {
   constructor(private userRepository: UserRepository) {}
 
-  async getUserById(id: string): Promise<Response<User | undefined>> {
-    return this.userRepository.findById(id)
+  async getUserById({ userId }: { userId: string }): Promise<Response<User | undefined>> {
+    return this.userRepository.findById({ userId })
   }
 
   async getAllUsers(): Promise<Response<User[]>> {
@@ -20,5 +21,13 @@ export class UserService {
 
   async getUserWorkspaces({ userId }: { userId: string }): Promise<Response<Workspace[]>> {
     return this.userRepository.getUserWorkspaces({ userId })
+  }
+
+  async getUserTeams({ userId }: { userId: string }): Promise<Response<Team[]>> {
+    return this.userRepository.getUserTeams({ userId })
+  }
+
+  async getUserTeam({ userId, teamId }: { userId: string; teamId: string }): Promise<Response<Team | undefined>> {
+    return this.userRepository.getUserTeam({ userId, teamId })
   }
 }

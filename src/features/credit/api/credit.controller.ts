@@ -87,17 +87,4 @@ export class CreditController {
     console.log('Webhook processed successfully:', data)
     return c.json({ success: true, data }, 200)
   }
-
-  async getTeamCredits(c: Context<AppEnvironment>) {
-    // TODO: only team members should be able to get team credits.
-    const teamId = c.req.param('teamId')
-    const [serviceError, result] = await this.creditService.getTeamCredits({ teamId })
-
-    if (serviceError) {
-      console.error('Error getting user credits:', serviceError)
-      return c.json({ success: false, data: { error: serviceError.message } }, serviceError.code)
-    }
-
-    return c.json({ success: true, data: result }, 200)
-  }
 }

@@ -8,8 +8,10 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   getUserById = async (c: Context<AppEnvironment>) => {
-    const userId = c.req.param('id')
-    const [error, user] = await withLogging('Get user by id', { userId }, () => this.userService.getUserById(userId))
+    const userId = c.req.param('userId')
+    const [error, user] = await withLogging('Get user by id', { userId }, () =>
+      this.userService.getUserById({ userId })
+    )
 
     if (error) return c.json({ success: false }, error.code)
 
@@ -48,5 +50,28 @@ export class UserController {
     if (error) return c.json({ success: false }, error.code)
 
     return c.json({ success: true, data: workspaces }, 200)
+  }
+
+  getUserTeams = async (c: Context<AppEnvironment>) => {
+    const userId = c.req.param('userId')
+    const [error, teams] = await withLogging('Get user teams', { userId }, () =>
+      this.userService.getUserTeams({ userId })
+    )
+
+    if (error) return c.json({ success: false }, error.code)
+
+    return c.json({ success: true, data: teams }, 200)
+  }
+
+  getUserTeam = async (c: Context<AppEnvironment>) => {
+    const userId = c.req.param('userId')
+    const teamId = c.req.param('teamId')
+    const [error, team] = await withLogging('Get user team', { userId, teamId }, () =>
+      this.userService.getUserTeam({ userId, teamId })
+    )
+
+    if (error) return c.json({ success: false }, error.code)
+
+    return c.json({ success: true, data: team }, 200)
   }
 }

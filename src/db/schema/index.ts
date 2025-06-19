@@ -5,3 +5,5 @@ export { userToWorkspace } from '../../features/workspace/infrastructure/user_to
 export { mediaToWorkspace } from '../../features/workspace/infrastructure/media_to_workspace.schema'
 export { transcript } from '../../features/transcript/infrastructure/transcript.schema'
 export { credit } from '../../features/credit/infrastructure/credit.schema'
+export { team } from '../../features/team/infrastructure/team.schema'
+export { userToTeam } from '../../features/team/infrastructure/user_to_team.schema'

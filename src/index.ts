@@ -26,11 +26,14 @@ const userRouter = new Hono<AppEnvironment>()
 const workspaceRouter = new Hono<AppEnvironment>()
 const storageRouter = new Hono<AppEnvironment>()
 const creditRouter = new Hono<AppEnvironment>()
+const teamRouter = new Hono<AppEnvironment>()
 
 userRouter.get('/', c => c.get('container').userController.getAllUsers(c))
 userRouter.get('/:userId', c => c.get('container').userController.getUserById(c))
 userRouter.put('/:userId', c => c.get('container').userController.updateUser(c))
 userRouter.get('/:userId/workspaces', c => c.get('container').userController.getUserWorkspaces(c))
+userRouter.get('/:userId/teams', c => c.get('container').userController.getUserTeams(c))
+userRouter.get('/:userId/teams/:teamId', c => c.get('container').userController.getUserTeam(c))
 
 workspaceRouter.get('/', c => c.get('container').workspaceController.getAllWorkspaces(c))
 workspaceRouter.get('/:workspaceId', c => c.get('container').workspaceController.getWorkspaceById(c))
@@ -46,12 +49,16 @@ storageRouter.post('/', c => c.get('container').storageController.uploadMedia(c)
 storageRouter.delete('/', c => c.get('container').storageController.deleteMedia(c))
 
 creditRouter.post('/create-checkout-session', c => c.get('container').creditController.createCheckoutSession(c))
-creditRouter.get('/team/:teamId/credits', c => c.get('container').creditController.getTeamCredits(c))
+
+teamRouter.put('/:teamId', c => c.get('container').teamController.upsertTeam(c))
+teamRouter.delete('/:teamId', c => c.get('container').teamController.deleteTeam(c))
+teamRouter.get('/:teamId/credits', c => c.get('container').teamController.getTeamCredits(c))
 
 apiRouter.route('/users', userRouter)
 apiRouter.route('/workspaces', workspaceRouter)
 apiRouter.route('/storage', storageRouter)
-apiRouter.route('/credit', creditRouter)
+apiRouter.route('/credits', creditRouter)
+apiRouter.route('/teams', teamRouter)
 
 app.route('/api', apiRouter)
 

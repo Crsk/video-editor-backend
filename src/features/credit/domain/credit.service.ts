@@ -117,8 +117,4 @@ export class CreditService {
       return [null, { message: `Unhandled event type: ${event?.type}` }]
     }
   }
-
-  async getTeamCredits({ teamId }: { teamId: string }): Promise<Response<number>> {
-    return this.creditRepository.getTeamCreditBalance({ teamId })
-  }
 }

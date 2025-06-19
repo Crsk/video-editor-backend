@@ -14,6 +14,9 @@ import { TranscriptRepository } from '../../features/transcript/infrastructure/t
 import { CreditService } from '../../features/credit/domain/credit.service'
 import { CreditController } from '../../features/credit/api/credit.controller'
 import { CreditRepository } from '../../features/credit/infrastructure/credit.repository'
+import { TeamService } from '../../features/team/domain/team.service'
+import { TeamController } from '../../features/team/api/team.controller'
+import { TeamRepository } from '../../features/team/infrastructure/team.repository'
 
 export type Container = {
   userController: UserController
@@ -22,6 +25,8 @@ export type Container = {
   storageController: StorageController
   creditService: CreditService
   creditController: CreditController
+  teamController: TeamController
+  teamService: TeamService
 }
 
 export const createContainer = (env: AppEnvironment['Bindings']): Container => {
@@ -51,12 +56,18 @@ export const createContainer = (env: AppEnvironment['Bindings']): Container => {
   const creditService = new CreditService(creditRepository)
   const creditController = new CreditController(creditService)
 
+  const teamRepository = new TeamRepository(db)
+  const teamService = new TeamService(teamRepository)
+  const teamController = new TeamController(teamService)
+
   return {
     userController,
     transcriptController,
     storageController,
     workspaceController,
     creditService,
-    creditController
+    creditController,
+    teamController,
+    teamService
   }
 }
